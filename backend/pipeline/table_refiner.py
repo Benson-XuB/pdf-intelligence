@@ -21,11 +21,68 @@ def refine_dataframe(df: pd.DataFrame) -> pd.DataFrame:
     df = df.map(lambda x: str(x).strip())
 
     df = _drop_empty_rows(df)
+    df = _fix_orphaned_parentheses(df)
     df = _merge_fragmented_columns(df)
     df = _fix_column_headers(df)
     df = _fix_total_row(df)
     df = _normalize_numeric_columns(df)
     df = _drop_empty_rows(df)
+    return df
+
+
+def _fix_orphaned_parentheses(df: pd.DataFrame) -> pd.DataFrame:
+    """修复 PDF 列切分导致的孤立括号。
+
+    财务报表中 (36.8) 表示负数。当 PDF 列边界不准时，
+    ) 和 (36.8) 可能被切到不同列，产生 ") (36.8" 或孤立括号单元格。
+    """
+    if df is None or df.empty:
+        return df
+
+    for row_idx in range(len(df)):
+        for col_idx in range(len(df.columns)):
+            val = str(df.iloc[row_idx, col_idx]).strip()
+
+            # 1. Cell is just ")" — find its number neighbor
+            if val in (")", "）"):
+                merged_left = False
+                # Prefer left neighbor (the ) closes the previous number)
+                if col_idx > 0:
+                    left = str(df.iloc[row_idx, col_idx - 1]).strip()
+                    left_num = _parse_number(left)
+                    if left_num is not None:
+                        df.iloc[row_idx, col_idx - 1] = f"({abs(left_num)})" if "(" not in left else left
+                        df.iloc[row_idx, col_idx] = ""
+                        merged_left = True
+                if not merged_left and col_idx + 1 < len(df.columns):
+                    right = str(df.iloc[row_idx, col_idx + 1]).strip()
+                    right_num = _parse_number(right)
+                    if right_num is not None:
+                        df.iloc[row_idx, col_idx + 1] = f"({abs(right_num)})" if "(" not in right else right
+                        df.iloc[row_idx, col_idx] = ""
+
+            # 2. Cell is just "(" — merge with right number neighbor
+            elif val in ("(", "（"):
+                if col_idx + 1 < len(df.columns):
+                    right = str(df.iloc[row_idx, col_idx + 1]).strip()
+                    right_num = _parse_number(right)
+                    if right_num is not None:
+                        df.iloc[row_idx, col_idx + 1] = f"({abs(right_num)})" if "(" not in right else right
+                        df.iloc[row_idx, col_idx] = ""
+
+            # 3. Cell starts with ") (" or ") number" — stripping orphaned leading )
+            elif val.startswith(")") and len(val) > 1:
+                stripped = val[1:].strip()
+                num = _parse_number(stripped)
+                if num is not None:
+                    df.iloc[row_idx, col_idx] = f"({abs(num)})" if "(" not in stripped else stripped
+                elif stripped.startswith("(") and not stripped.endswith(")"):
+                    inner = stripped[1:]
+                    if _parse_number(inner) is not None:
+                        df.iloc[row_idx, col_idx] = f"({inner})"
+                else:
+                    df.iloc[row_idx, col_idx] = stripped
+
     return df
 
 
