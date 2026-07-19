@@ -20,6 +20,8 @@ from backend.config import settings
 
 PUBLIC_PATHS = {
     "/",
+    "/index.html",
+    "/dashboard.html",
     "/api/health",
     "/api/auth/register",
     "/api/auth/login",

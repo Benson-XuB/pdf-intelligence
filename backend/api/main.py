@@ -63,3 +63,19 @@ if _FRONTEND_DIR.exists():
 @app.get("/")
 def root():
     return FileResponse(str(_FRONTEND_DIR / "dashboard.html")) if (_FRONTEND_DIR / "dashboard.html").exists() else {"ok": True}
+
+
+@app.get("/index.html")
+def extraction_page():
+    target = _FRONTEND_DIR / "index.html"
+    if target.exists():
+        return FileResponse(str(target))
+    return {"ok": True}
+
+
+@app.get("/dashboard.html")
+def dashboard_page():
+    target = _FRONTEND_DIR / "dashboard.html"
+    if target.exists():
+        return FileResponse(str(target))
+    return {"ok": True}
