@@ -1101,7 +1101,25 @@
         } catch (e) { console.warn("Feedback save error", e); }
       }
 
-      window.open(`${API}/api/jobs/${currentJobId}/download`, "_blank");
+      // Use authFetch so bearer token is included in the request
+      try {
+        btn.textContent = "Downloading...";
+        const res = await authFetch(`${API}/api/jobs/${currentJobId}/download`);
+        if (!res.ok) throw new Error(await res.text());
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `extracted_${currentJobId}.xlsx`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      } catch (e) {
+        console.error("Download failed", e);
+        alert("Download failed: " + e.message);
+      }
+
       btn.disabled = false;
       btn.textContent = _edits.length > 0
         ? `Download Excel (${_edits.length} edit${_edits.length !== 1 ? "s" : ""})`
