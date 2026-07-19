@@ -65,13 +65,13 @@ info "3/8 创建 Python 虚拟环境…"
 if [[ ! -d "$APP_DIR/.venv" ]]; then
     python3 -m venv "$APP_DIR/.venv"
 fi
-"$APP_DIR/.venv/bin/pip" install --upgrade pip -q
+"$APP_DIR/.venv/bin/pip" install --upgrade pip -q -i https://pypi.org/simple/ --timeout 120
 log "虚拟环境已就绪"
 
 # ── 4. 安装依赖 ────────────────────────────────────────────────────
 info "4/8 安装 Python 依赖（这一步会下载 Docling 模型，需要几分钟）…"
 cd "$APP_DIR"
-"$APP_DIR/.venv/bin/pip" install -e . -q
+"$APP_DIR/.venv/bin/pip" install -e . --timeout 120 -i https://pypi.org/simple/
 log "依赖安装完成"
 
 # ── 5. 配置环境变量 ────────────────────────────────────────────────
