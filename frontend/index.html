@@ -290,25 +290,6 @@
     }
     .usage-count.exhausted { background: rgba(255,107,107,0.15); color: #ff6b6b; }
 
-    .guest-badge {
-      font-size: 0.7rem; padding: 0.2rem 0.55rem; border-radius: 10px;
-      background: rgba(45,212,168,0.1); color: var(--accent);
-      font-weight: 500;
-    }
-    .guest-banner {
-      display: flex; align-items: center; justify-content: center;
-      padding: 0.55rem 1rem; margin-bottom: 0.75rem;
-      background: rgba(45,212,168,0.06); border: 1px solid rgba(45,212,168,0.15);
-      border-radius: var(--radius-sm); font-size: 0.78rem; color: var(--text);
-    }
-    .guest-banner.hidden { display: none; }
-    .guest-banner-text { display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; justify-content: center; }
-    .guest-banner .link-btn {
-      background: none; border: none; color: var(--accent); cursor: pointer;
-      font-weight: 600; font-size: 0.78rem; text-decoration: underline; padding: 0;
-    }
-    .guest-banner .link-btn:hover { color: #1aad7f; }
-
     .success-msg {
       display: none; font-size: 0.78rem; padding: 0.5rem 0.75rem;
       background: rgba(45,212,168,0.1); border: 1px solid rgba(45,212,168,0.25);
@@ -386,7 +367,6 @@
       <div class="logo">PI</div>
       <h1>PDF Intelligence</h1>
       <div class="auth-area" id="authArea">
-        <span class="guest-badge" id="guestBadge">Try free — no sign-up</span>
         <button class="auth-btn" id="loginBtn" onclick="openAuthModal()">Sign In</button>
       </div>
     </header>
@@ -394,14 +374,6 @@
       Extract tables from any PDF using dual-engine AI (Docling + pdfplumber).
       Low-confidence pages automatically fall back to Qwen cloud vision model.
     </p>
-
-    <!-- Guest trial banner -->
-    <div class="guest-banner" id="guestBanner">
-      <div class="guest-banner-text">
-        <strong>Try it now</strong> — upload 1 PDF for free, no account needed.
-        <button class="link-btn" onclick="openAuthModal()">Sign in</button> for 2 more free uploads.
-      </div>
-    </div>
 
     <div class="nav-row">
       <a class="nav-link active" href="index.html">Table Extraction</a>
@@ -635,14 +607,8 @@
         `;
       } else {
         area.innerHTML = `
-          <span class="guest-badge" id="guestBadge">Try free — no sign-up</span>
           <button class="auth-btn" id="loginBtn" onclick="openAuthModal()">Sign In</button>
         `;
-      }
-      // Show/hide guest banner
-      const banner = $("guestBanner");
-      if (banner) {
-        banner.classList.toggle("hidden", !!authUser);
       }
       // Update DeepSeek toggle based on tier
       updateDeepseekToggle();
@@ -977,6 +943,12 @@
     async function runExtraction() {
       if (!selectedFile) return;
 
+      // Require login before upload
+      if (!authToken) {
+        openAuthModal();
+        return;
+      }
+
       clearPolling();
       progressWrap.classList.add("visible");
       progressFill.style.width = "5%";
@@ -1010,10 +982,6 @@
       } catch (err) {
         progressText.textContent = "Failed: " + err.message;
         startBtn.disabled = false;
-        // If guest limit, prompt to sign in
-        if (err.message.includes("Guest trial") || err.message.includes("guest")) {
-          setTimeout(() => openAuthModal(), 500);
-        }
       }
     }
 

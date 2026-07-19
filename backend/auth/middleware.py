@@ -1,22 +1,17 @@
-"""Auth middleware: extract JWT user, enforce tier limits, allow guest trial."""
-
+"""Auth middleware: extract JWT user, enforce tier limits."""
 from __future__ import annotations
 
-from typing import Optional
-
-from fastapi import HTTPException, Request
+from fastapi import Request
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import JSONResponse
 
 from backend.auth.database import (
-    get_guest_upload_count,
     get_lifetime_usage_count,
     get_tier_limits,
     get_usage_count,
     get_user_by_id,
 )
 from backend.auth.jwt_handler import verify_token
-from backend.config import settings
 
 PUBLIC_PATHS = {
     "/",
@@ -34,18 +29,6 @@ PUBLIC_PATHS = {
     "/docs",
     "/redoc",
 }
-
-
-def _client_ip(request: Request) -> str:
-    """Best-effort client IP extraction."""
-    forwarded = request.headers.get("X-Forwarded-For", "")
-    if forwarded:
-        return forwarded.split(",")[0].strip()
-    real_ip = request.headers.get("X-Real-IP", "")
-    if real_ip:
-        return real_ip.strip()
-    host = getattr(request.client, "host", None) if request.client else None
-    return host or "127.0.0.1"
 
 
 class AuthMiddleware(BaseHTTPMiddleware):
@@ -67,36 +50,10 @@ class AuthMiddleware(BaseHTTPMiddleware):
             token = auth_header[7:]
 
         if not token:
-            # Guest-accessible API paths (job status polling, table data, downloads)
-            if request.url.path.startswith("/api/jobs/") or request.url.path.startswith("/api/tables/") or request.url.path.startswith("/api/status/") or request.url.path.startswith("/api/feedback") or request.url.path.startswith("/api/download/") or request.url.path.startswith("/api/export/"):
-                request.state.user = None
-                request.state.is_guest = True
-                return await call_next(request)
-
-            # Guest upload: allow N free tries per IP
-            if path == "/api/upload" and request.method == "POST":
-                ip = _client_ip(request)
-                count = get_guest_upload_count(ip)
-                max_guest = settings.guest_max_uploads
-                if count >= max_guest:
-                    return JSONResponse(
-                        status_code=429,
-                        content={
-                            "detail": f"Guest trial limit reached ({max_guest} free upload{'' if max_guest == 1 else 's'}). Sign in for {2} more free uploads — no password needed.",
-                            "code": "guest_limit",
-                            "used": count,
-                            "limit": max_guest,
-                        },
-                    )
-                # Allow through — upload_pdf will record the guest upload
-                request.state.user = None
-                request.state.is_guest = True
-                return await call_next(request)
-
             return JSONResponse(
                 status_code=401,
                 content={
-                    "detail": "Sign in to continue — no password needed, just your email.",
+                    "detail": "Sign in to continue.",
                     "code": "auth_required",
                 },
             )
