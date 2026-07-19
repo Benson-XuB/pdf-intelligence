@@ -10,6 +10,7 @@ from backend.api.auth import usage_tracker
 from backend.api.v1.routes import router as v1_router
 from backend.api import legacy_routes
 from backend.api import auth_routes
+from backend.api import stripe_routes
 from backend.auth.middleware import AuthMiddleware
 
 app = FastAPI(
@@ -53,6 +54,7 @@ async def log_requests(request: Request, call_next):
 
 app.include_router(v1_router)
 app.include_router(auth_routes.router)
+app.include_router(stripe_routes.router)
 legacy_routes.register(app)
 
 _FRONTEND_DIR = Path(__file__).resolve().parents[2] / "frontend"

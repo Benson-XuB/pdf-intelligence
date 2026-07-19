@@ -32,6 +32,7 @@ def init_db() -> None:
             password_hash TEXT NOT NULL DEFAULT '',
             name          TEXT NOT NULL DEFAULT '',
             tier          TEXT NOT NULL DEFAULT 'free',       -- free | pro | enterprise
+            stripe_customer_id TEXT DEFAULT '',
             created_at    TEXT NOT NULL DEFAULT (datetime('now')),
             updated_at    TEXT NOT NULL DEFAULT (datetime('now'))
         );
@@ -40,6 +41,7 @@ def init_db() -> None:
             id          INTEGER PRIMARY KEY AUTOINCREMENT,
             user_id     INTEGER NOT NULL REFERENCES users(id),
             tier        TEXT NOT NULL,                         -- pro | enterprise
+            stripe_subscription_id TEXT DEFAULT '',
             started_at  TEXT NOT NULL DEFAULT (datetime('now')),
             expires_at  TEXT,                                  -- NULL = never
             active      INTEGER NOT NULL DEFAULT 1
@@ -72,6 +74,15 @@ def init_db() -> None:
         CREATE INDEX IF NOT EXISTS idx_vt_email ON verification_tokens(email, expires_at);
         CREATE INDEX IF NOT EXISTS idx_guest_ip ON guest_uploads(ip_address);
     """)
+    # Migrate existing databases to add stripe columns
+    try:
+        conn.execute("ALTER TABLE users ADD COLUMN stripe_customer_id TEXT DEFAULT ''")
+    except sqlite3.OperationalError:
+        pass  # column already exists
+    try:
+        conn.execute("ALTER TABLE subscriptions ADD COLUMN stripe_subscription_id TEXT DEFAULT ''")
+    except sqlite3.OperationalError:
+        pass
     conn.commit()
 
 
@@ -99,13 +110,13 @@ def create_user(email: str, password_hash: str = "", name: str = "") -> dict:
     return dict(row)
 
 
-def update_user_tier(user_id: int, tier: str) -> None:
+def update_user_tier(user_id: int, tier: str, stripe_subscription_id: str = "") -> None:
     conn = _get_conn()
     now = datetime.now(timezone.utc).isoformat()
     conn.execute("UPDATE users SET tier = ?, updated_at = ? WHERE id = ?", (tier, now, user_id))
     conn.execute(
-        "INSERT INTO subscriptions (user_id, tier, started_at) VALUES (?, ?, ?)",
-        (user_id, tier, now),
+        "INSERT INTO subscriptions (user_id, tier, stripe_subscription_id, started_at) VALUES (?, ?, ?, ?)",
+        (user_id, tier, stripe_subscription_id, now),
     )
     conn.commit()
 
@@ -226,3 +237,23 @@ TIER_LIMITS = {
 
 def get_tier_limits(tier: str) -> dict:
     return TIER_LIMITS.get(tier, TIER_LIMITS["free"])
+
+
+def set_stripe_customer_id(user_id: int, stripe_customer_id: str) -> None:
+    conn = _get_conn()
+    conn.execute("UPDATE users SET stripe_customer_id = ? WHERE id = ?", (stripe_customer_id, user_id))
+    conn.commit()
+
+
+def get_user_by_stripe_customer(customer_id: str) -> Optional[dict]:
+    conn = _get_conn()
+    row = conn.execute("SELECT * FROM users WHERE stripe_customer_id = ?", (customer_id,)).fetchone()
+    return dict(row) if row else None
+
+
+def cancel_subscription(user_id: int) -> None:
+    conn = _get_conn()
+    now = datetime.now(timezone.utc).isoformat()
+    conn.execute("UPDATE subscriptions SET active = 0, expires_at = ? WHERE user_id = ? AND active = 1", (now, user_id))
+    conn.execute("UPDATE users SET tier = 'free', updated_at = ? WHERE id = ?", (now, user_id))
+    conn.commit()

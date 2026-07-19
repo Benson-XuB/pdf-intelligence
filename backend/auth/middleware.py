@@ -24,6 +24,7 @@ PUBLIC_PATHS = {
     "/api/auth/verify",
     "/api/auth/google",
     "/api/auth/google/callback",
+    "/api/stripe/webhook",
     "/api/v1/health",
     "/openapi.json",
     "/docs",

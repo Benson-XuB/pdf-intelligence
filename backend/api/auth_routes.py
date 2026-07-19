@@ -307,6 +307,11 @@ def me(request: Request):
 
 @router.post("/upgrade")
 def upgrade(request: Request, tier: str = "pro"):
+    """Initiate Stripe Checkout for the given tier.
+
+    Returns {"url": "https://checkout.stripe.com/..."} for the frontend to redirect to.
+    Falls back to direct-upgrade if Stripe is not configured (dev mode).
+    """
     user = request.state.user
     if not user:
         raise HTTPException(401, "Not authenticated")
@@ -315,7 +320,48 @@ def upgrade(request: Request, tier: str = "pro"):
     if tier == user["tier"]:
         raise HTTPException(400, f"Already on {tier} tier")
 
+    # Stripe mode
+    if settings.stripe_secret_key:
+        import stripe as _stripe
+        from backend.auth.database import set_stripe_customer_id
+        _stripe.api_key = settings.stripe_secret_key
+
+        customer_id = user.get("stripe_customer_id", "")
+        if not customer_id:
+            customer = _stripe.Customer.create(
+                email=user["email"],
+                name=user.get("name", user["email"].split("@")[0]),
+                metadata={"user_id": str(user["id"])},
+            )
+            customer_id = customer.id
+            set_stripe_customer_id(user["id"], customer_id)
+
+        scheme = request.headers.get("X-Forwarded-Proto", request.url.scheme or "https")
+        host = request.headers.get("X-Forwarded-Host", request.headers.get("Host", "localhost"))
+        base = f"{scheme}://{host}"
+
+        price_lookup = {
+            "pro": "price_pro_monthly",
+            "enterprise": "price_enterprise_monthly",
+        }
+
+        session = _stripe.checkout.Session.create(
+            customer=customer_id,
+            mode="subscription",
+            line_items=[{"price": price_lookup[tier], "quantity": 1}],
+            success_url=f"{base}/ui/index.html?session_id={{CHECKOUT_SESSION_ID}}&tier={tier}",
+            cancel_url=f"{base}/ui/index.html",
+            metadata={"user_id": str(user["id"]), "tier": tier},
+            allow_promotion_codes=True,
+        )
+
+        if not session.url:
+            raise HTTPException(500, "Stripe session creation failed")
+
+        log_usage(user["id"], f"initiate_upgrade_{tier}")
+        return {"url": session.url, "session_id": session.id}
+
+    # Fallback: direct upgrade (dev mode, no Stripe configured)
     update_user_tier(user["id"], tier)
     log_usage(user["id"], f"upgrade_to_{tier}")
-
     return {"message": f"Upgraded to {tier}", "tier": tier}

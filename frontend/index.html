@@ -594,15 +594,20 @@
       if (authUser) {
         const tierColor = authUser.tier === "pro" ? "pro" : authUser.tier === "enterprise" ? "enterprise" : "free";
         let extraBadge = "";
+        let billingBtn = "";
         if (authUser.tier === "free" && tierInfoCache) {
           const remaining = Math.max(0, (tierInfoCache.lifetime_limit || 2) - (tierInfoCache.lifetime_uploads || 0));
           extraBadge = `<span class="usage-count ${remaining === 0 ? 'exhausted' : ''}">${remaining} upload${remaining !== 1 ? 's' : ''} left</span>`;
+        }
+        if (authUser.tier === "pro" || authUser.tier === "enterprise") {
+          billingBtn = `<button class="auth-btn" onclick="manageBilling()" title="Cancel or update plan">Billing</button>`;
         }
         area.innerHTML = `
           <span class="user-badge ${tierColor}" onclick="openSubscriptionModal()" title="Click to manage plan">
             ${authUser.email} · ${authUser.tier.toUpperCase()}
           </span>
           ${extraBadge}
+          ${billingBtn}
           <button class="auth-btn" onclick="clearAuth()" title="Logout">Logout</button>
         `;
       } else {
@@ -752,12 +757,18 @@
         const data = await res.json();
         if (!res.ok) throw new Error(data.detail || "Upgrade failed");
 
-        // Refresh user info
+        // If Stripe is configured, redirect to Checkout
+        if (data.url) {
+          window.location.href = data.url;
+          return;
+        }
+
+        // Dev mode: direct upgrade (no Stripe)
         authUser.tier = tier;
         localStorage.setItem("pi_user", JSON.stringify(authUser));
         updateAuthUI();
         closeSubscriptionModal();
-        alert(`Upgraded to ${tier.toUpperCase()}!`);
+        alert(`Upgraded to ${tier.toUpperCase()}! (Dev mode — no payment)`);
       } catch (e) {
         alert(e.message);
       }
@@ -1341,6 +1352,42 @@
         if (cb) { cb.checked = !cb.checked; cb.dispatchEvent(new Event("change")); }
       });
     });
+
+    // ── Stripe Billing Portal ───────────────────────────────────────
+    async function manageBilling() {
+      try {
+        const res = await fetch(`${API}/api/stripe/portal`, {
+          method: "POST",
+          headers: { "Authorization": `Bearer ${authToken}` },
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || "Billing portal failed");
+        if (data.url) window.location.href = data.url;
+      } catch (e) { alert(e.message); }
+    }
+
+    // ── Handle Stripe return (success/cancel from Checkout) ─────────
+    (function() {
+      const params = new URLSearchParams(window.location.search);
+      const sessionId = params.get("session_id");
+      const tier = params.get("tier");
+      if (sessionId && authToken) {
+        // Refresh user info from server after returning from Stripe
+        fetch(`${API}/api/auth/me`, {
+          headers: { "Authorization": `Bearer ${authToken}` },
+        }).then(r => r.json()).then(data => {
+          if (data.user) {
+            authUser = data.user;
+            localStorage.setItem("pi_user", JSON.stringify(authUser));
+            updateAuthUI();
+          }
+          // Clean URL
+          if (window.history.replaceState) {
+            window.history.replaceState({}, document.title, window.location.pathname);
+          }
+        }).catch(() => {});
+      }
+    })();
   </script>
 </body>
 </html>
