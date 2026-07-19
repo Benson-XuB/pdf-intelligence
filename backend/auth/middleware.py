@@ -67,6 +67,12 @@ class AuthMiddleware(BaseHTTPMiddleware):
             token = auth_header[7:]
 
         if not token:
+            # Guest-accessible API paths (job status polling, table data, downloads)
+            if request.url.path.startswith("/api/jobs/") or request.url.path.startswith("/api/tables/") or request.url.path.startswith("/api/status/") or request.url.path.startswith("/api/feedback") or request.url.path.startswith("/api/download/") or request.url.path.startswith("/api/export/"):
+                request.state.user = None
+                request.state.is_guest = True
+                return await call_next(request)
+
             # Guest upload: allow N free tries per IP
             if path == "/api/upload" and request.method == "POST":
                 ip = _client_ip(request)
