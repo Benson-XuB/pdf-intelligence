@@ -146,56 +146,41 @@ else
     warn "服务启动失败，查看: journalctl -u pdf-intelligence -n 30"
 fi
 
-# ── 7. Nginx 反向代理 ──────────────────────────────────────────────
-info "7/8 配置 Nginx…"
-cat > "/etc/nginx/sites-available/$DOMAIN" << NGINXEOF
-# HTTP → HTTPS 重定向
+# ── 7. Nginx 反向代理（先配 HTTP，certbot 会自动加上 HTTPS）───
+info "7/8 配置 Nginx（HTTP 模式）…"
+cat > "/etc/nginx/sites-available/$DOMAIN" << 'NGINXEOF'
 server {
     listen 80;
-    server_name $DOMAIN;
-    return 301 https://\$server_name\$request_uri;
-}
+    server_name __DOMAIN__;
 
-# HTTPS 主服务
-server {
-    listen 443 ssl http2;
-    server_name $DOMAIN;
-
-    # SSL 证书由 certbot 自动管理
-    ssl_certificate     /etc/letsencrypt/live/$DOMAIN/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/$DOMAIN/privkey.pem;
-    include /etc/letsencrypt/options-ssl-nginx.conf;
-
-    # 上传文件大小限制
     client_max_body_size 50M;
     client_body_timeout 120s;
 
-    # gzip 压缩
     gzip on;
     gzip_types text/plain text/css application/json application/javascript text/xml;
 
     location / {
         proxy_pass http://127.0.0.1:8100;
-        proxy_set_header Host \$host;
-        proxy_set_header X-Real-IP \$remote_addr;
-        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto \$scheme;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
         proxy_read_timeout 300s;
         proxy_send_timeout 300s;
         proxy_buffering off;
     }
 
-    # WebSocket (用于实时进度推送，如果以后加的话)
     location /ws {
         proxy_pass http://127.0.0.1:8100;
         proxy_http_version 1.1;
-        proxy_set_header Upgrade \$http_upgrade;
+        proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection "upgrade";
-        proxy_set_header Host \$host;
+        proxy_set_header Host $host;
         proxy_read_timeout 86400s;
     }
 }
 NGINXEOF
+sed -i "s|__DOMAIN__|$DOMAIN|g" "/etc/nginx/sites-available/$DOMAIN"
 
 ln -sf "/etc/nginx/sites-available/$DOMAIN" "/etc/nginx/sites-enabled/$DOMAIN"
 rm -f /etc/nginx/sites-enabled/default
