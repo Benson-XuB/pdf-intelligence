@@ -1,0 +1,72 @@
+{
+  "pipeline": "verified_financials (SEC XBRL × PDF text)",
+  "corpus": "financial_10k_corpus_tier_c",
+  "template_count": 3,
+  "tested_count": 3,
+  "missing_templates": [],
+  "hk_templates": "无 — tests/benchmark/financial_hk/ 为空，需先找港股年报 PDF",
+  "overall_pdf_extraction_accuracy": 1.0,
+  "overall_verification_rate": 0.7631,
+  "total_reconciliation_mismatches": 17,
+  "threshold_go": 0.9,
+  "threshold_stop": 0.8,
+  "verdict": "GO — 模版准确度达标，可继续产品化",
+  "tier_stats": {
+    "C": {
+      "count": 3,
+      "pdf_extraction_accuracy": 1.0
+    }
+  },
+  "companies": [
+    {
+      "id": "CRM",
+      "name": "Salesforce",
+      "pdf": "/Users/xubaotian/pdf-intelligence/tests/benchmark/financial_10k/crm_10k.htm",
+      "tier": "C",
+      "pdf_extraction_accuracy": 1.0,
+      "verification_rate": 0.9142857142857143,
+      "trust_score": 0.8923,
+      "production_ready": false,
+      "recon_matched": 32,
+      "recon_mismatch": 3,
+      "field_hits": "27/27",
+      "errors": [],
+      "misses": []
+    },
+    {
+      "id": "TSLA",
+      "name": "Tesla",
+      "pdf": "/Users/xubaotian/pdf-intelligence/tests/benchmark/financial_10k/tsla_10k.htm",
+      "tier": "C",
+      "pdf_extraction_accuracy": 1.0,
+      "verification_rate": 0.875,
+      "trust_score": 0.8615,
+      "production_ready": false,
+      "recon_matched": 21,
+      "recon_mismatch": 3,
+      "field_hits": "27/27",
+      "errors": [
+        "PDF 未提取到: capex"
+      ],
+      "misses": []
+    },
+    {
+      "id": "HD",
+      "name": "Home Depot",
+      "pdf": "/Users/xubaotian/pdf-intelligence/tests/benchmark/financial_10k/hd_10k.htm",
+      "tier": "C",
+      "pdf_extraction_accuracy": 1.0,
+      "verification_rate": 0.5,
+      "trust_score": 0.559,
+      "production_ready": false,
+      "recon_matched": 11,
+      "recon_mismatch": 11,
+      "field_hits": "24/24",
+      "errors": [
+        "缺少 XBRL 标签: capex",
+        "PDF 未提取到: net_income"
+      ],
+      "misses": []
+    }
+  ]
+}

@@ -1,0 +1,311 @@
+{
+  "pipeline": "verified_financials (HK PDF × US XBRL cross-list)",
+  "template_count": 20,
+  "tested_count": 20,
+  "missing_templates": [],
+  "overall_verification_rate": 1.0,
+  "overall_trust_score": 0.9977,
+  "overall_pdf_coverage_rate": 1.0,
+  "companies": [
+    {
+      "id": "0700",
+      "name": "Tencent",
+      "pdf": "/Users/xubaotian/pdf-intelligence/tests/benchmark/financial_hk/0700_annual.pdf",
+      "cross_list_us": null,
+      "verification_rate": 1.0,
+      "trust_score": 1.0,
+      "pdf_coverage_rate": 1.0,
+      "production_ready": true,
+      "recon_mismatch": 0,
+      "errors": [
+        "TCEHY 无 SEC XBRL，启用 PDF-only trust 模型",
+        "行业字段跳过: gross_profit"
+      ]
+    },
+    {
+      "id": "9988",
+      "name": "Alibaba",
+      "pdf": "/Users/xubaotian/pdf-intelligence/tests/benchmark/financial_hk/9988_annual.pdf",
+      "cross_list_us": "BABA",
+      "verification_rate": 1.0,
+      "trust_score": 1.0,
+      "pdf_coverage_rate": 1.0,
+      "production_ready": true,
+      "recon_mismatch": 0,
+      "errors": [
+        "已使用 BABA SEC XBRL（US-GAAP，币种 CNY）交叉校验",
+        "行业字段跳过: gross_profit"
+      ]
+    },
+    {
+      "id": "3690",
+      "name": "Meituan",
+      "pdf": "/Users/xubaotian/pdf-intelligence/tests/benchmark/financial_hk/3690_annual.pdf",
+      "cross_list_us": null,
+      "verification_rate": 1.0,
+      "trust_score": 1.0,
+      "pdf_coverage_rate": 1.0,
+      "production_ready": true,
+      "recon_mismatch": 0,
+      "errors": [
+        "MPNGY 无 SEC XBRL，启用 PDF-only trust 模型",
+        "行业字段跳过: gross_profit"
+      ]
+    },
+    {
+      "id": "9618",
+      "name": "JD.com",
+      "pdf": "/Users/xubaotian/pdf-intelligence/tests/benchmark/financial_hk/9618_annual.pdf",
+      "cross_list_us": "JD",
+      "verification_rate": 1.0,
+      "trust_score": 1.0,
+      "pdf_coverage_rate": 1.0,
+      "production_ready": true,
+      "recon_mismatch": 0,
+      "errors": [
+        "已使用 JD SEC XBRL（US-GAAP，币种 CNY）交叉校验",
+        "行业字段跳过: gross_profit"
+      ]
+    },
+    {
+      "id": "1810",
+      "name": "Xiaomi",
+      "pdf": "/Users/xubaotian/pdf-intelligence/tests/benchmark/financial_hk/1810_annual.pdf",
+      "cross_list_us": null,
+      "verification_rate": 1.0,
+      "trust_score": 1.0,
+      "pdf_coverage_rate": 1.0,
+      "production_ready": true,
+      "recon_mismatch": 0,
+      "errors": [
+        "XIACY 无 SEC XBRL，启用 PDF-only trust 模型",
+        "行业字段跳过: gross_profit"
+      ]
+    },
+    {
+      "id": "9888",
+      "name": "Baidu",
+      "pdf": "/Users/xubaotian/pdf-intelligence/tests/benchmark/financial_hk/9888_annual.pdf",
+      "cross_list_us": "BIDU",
+      "verification_rate": 1.0,
+      "trust_score": 0.9531,
+      "pdf_coverage_rate": 1.0,
+      "production_ready": true,
+      "recon_mismatch": 0,
+      "errors": [
+        "已使用 BIDU SEC XBRL（US-GAAP，币种 CNY）交叉校验",
+        "行业字段跳过: gross_profit"
+      ]
+    },
+    {
+      "id": "1024",
+      "name": "Kuaishou",
+      "pdf": "/Users/xubaotian/pdf-intelligence/tests/benchmark/financial_hk/1024_annual.pdf",
+      "cross_list_us": null,
+      "verification_rate": 1.0,
+      "trust_score": 1.0,
+      "pdf_coverage_rate": 1.0,
+      "production_ready": true,
+      "recon_mismatch": 0,
+      "errors": [
+        "KUASF 无 SEC XBRL，启用 PDF-only trust 模型",
+        "PDF 未提取到: capex",
+        "行业字段跳过: gross_profit"
+      ]
+    },
+    {
+      "id": "1299",
+      "name": "AIA",
+      "pdf": "/Users/xubaotian/pdf-intelligence/tests/benchmark/financial_hk/1299_annual.pdf",
+      "cross_list_us": null,
+      "verification_rate": 1.0,
+      "trust_score": 1.0,
+      "pdf_coverage_rate": 1.0,
+      "production_ready": true,
+      "recon_mismatch": 0,
+      "errors": [
+        "AIA 无 SEC XBRL，启用 PDF-only trust 模型",
+        "行业字段跳过: capex, gross_profit, operating_income"
+      ]
+    },
+    {
+      "id": "0941",
+      "name": "China Mobile",
+      "pdf": "/Users/xubaotian/pdf-intelligence/tests/benchmark/financial_hk/0941_annual.pdf",
+      "cross_list_us": null,
+      "verification_rate": 1.0,
+      "trust_score": 1.0,
+      "pdf_coverage_rate": 1.0,
+      "production_ready": true,
+      "recon_mismatch": 0,
+      "errors": [
+        "CHL 无 SEC XBRL，启用 PDF-only trust 模型",
+        "行业字段跳过: gross_profit"
+      ]
+    },
+    {
+      "id": "0005",
+      "name": "HSBC",
+      "pdf": "/Users/xubaotian/pdf-intelligence/tests/benchmark/financial_hk/0005_annual.pdf",
+      "cross_list_us": "HSBC",
+      "verification_rate": 1.0,
+      "trust_score": 1.0,
+      "pdf_coverage_rate": 1.0,
+      "production_ready": true,
+      "recon_mismatch": 0,
+      "errors": [
+        "已使用 HSBC SEC XBRL（IFRS，币种 HKD）交叉校验",
+        "行业字段跳过: capex, gross_profit, operating_income"
+      ]
+    },
+    {
+      "id": "9999",
+      "name": "NetEase",
+      "pdf": "/Users/xubaotian/pdf-intelligence/tests/benchmark/financial_hk/9999_annual.pdf",
+      "cross_list_us": "NTES",
+      "verification_rate": 1.0,
+      "trust_score": 1.0,
+      "pdf_coverage_rate": 1.0,
+      "production_ready": true,
+      "recon_mismatch": 0,
+      "errors": [
+        "已使用 NTES SEC XBRL（US-GAAP，币种 CNY）交叉校验",
+        "行业字段跳过: gross_profit"
+      ]
+    },
+    {
+      "id": "2015",
+      "name": "Li Auto",
+      "pdf": "/Users/xubaotian/pdf-intelligence/tests/benchmark/financial_hk/2015_annual.pdf",
+      "cross_list_us": "LI",
+      "verification_rate": 1.0,
+      "trust_score": 1.0,
+      "pdf_coverage_rate": 1.0,
+      "production_ready": true,
+      "recon_mismatch": 0,
+      "errors": [
+        "已使用 LI SEC XBRL（US-GAAP，币种 CNY）交叉校验",
+        "行业字段跳过: gross_profit"
+      ]
+    },
+    {
+      "id": "9868",
+      "name": "XPeng",
+      "pdf": "/Users/xubaotian/pdf-intelligence/tests/benchmark/financial_hk/9868_annual.pdf",
+      "cross_list_us": "XPEV",
+      "verification_rate": 1.0,
+      "trust_score": 1.0,
+      "pdf_coverage_rate": 1.0,
+      "production_ready": true,
+      "recon_mismatch": 0,
+      "errors": [
+        "已使用 XPEV SEC XBRL（US-GAAP，币种 CNY）交叉校验",
+        "行业字段跳过: gross_profit"
+      ]
+    },
+    {
+      "id": "9866",
+      "name": "NIO",
+      "pdf": "/Users/xubaotian/pdf-intelligence/tests/benchmark/financial_hk/9866_annual.pdf",
+      "cross_list_us": "NIO",
+      "verification_rate": 1.0,
+      "trust_score": 1.0,
+      "pdf_coverage_rate": 1.0,
+      "production_ready": true,
+      "recon_mismatch": 0,
+      "errors": [
+        "已使用 NIO SEC XBRL（US-GAAP，币种 CNY）交叉校验",
+        "行业字段跳过: gross_profit"
+      ]
+    },
+    {
+      "id": "2318",
+      "name": "Ping An",
+      "pdf": "/Users/xubaotian/pdf-intelligence/tests/benchmark/financial_hk/2318_annual.pdf",
+      "cross_list_us": null,
+      "verification_rate": 1.0,
+      "trust_score": 1.0,
+      "pdf_coverage_rate": 1.0,
+      "production_ready": true,
+      "recon_mismatch": 0,
+      "errors": [
+        "未配置美股交叉上市，启用 PDF-only trust 模型",
+        "行业字段跳过: capex, gross_profit, operating_income"
+      ]
+    },
+    {
+      "id": "2628",
+      "name": "China Life",
+      "pdf": "/Users/xubaotian/pdf-intelligence/tests/benchmark/financial_hk/2628_annual.pdf",
+      "cross_list_us": null,
+      "verification_rate": 1.0,
+      "trust_score": 1.0,
+      "pdf_coverage_rate": 1.0,
+      "production_ready": true,
+      "recon_mismatch": 0,
+      "errors": [
+        "未配置美股交叉上市，启用 PDF-only trust 模型",
+        "行业字段跳过: capex, gross_profit, operating_income"
+      ]
+    },
+    {
+      "id": "0992",
+      "name": "Lenovo",
+      "pdf": "/Users/xubaotian/pdf-intelligence/tests/benchmark/financial_hk/0992_annual.pdf",
+      "cross_list_us": null,
+      "verification_rate": 1.0,
+      "trust_score": 1.0,
+      "pdf_coverage_rate": 1.0,
+      "production_ready": true,
+      "recon_mismatch": 0,
+      "errors": [
+        "未配置美股交叉上市，启用 PDF-only trust 模型"
+      ]
+    },
+    {
+      "id": "0883",
+      "name": "CNOOC",
+      "pdf": "/Users/xubaotian/pdf-intelligence/tests/benchmark/financial_hk/0883_annual.pdf",
+      "cross_list_us": null,
+      "verification_rate": 1.0,
+      "trust_score": 1.0,
+      "pdf_coverage_rate": 1.0,
+      "production_ready": true,
+      "recon_mismatch": 0,
+      "errors": [
+        "未配置美股交叉上市，启用 PDF-only trust 模型",
+        "行业字段跳过: gross_profit, operating_income"
+      ]
+    },
+    {
+      "id": "0939",
+      "name": "CCB",
+      "pdf": "/Users/xubaotian/pdf-intelligence/tests/benchmark/financial_hk/0939_annual.pdf",
+      "cross_list_us": null,
+      "verification_rate": 1.0,
+      "trust_score": 1.0,
+      "pdf_coverage_rate": 1.0,
+      "production_ready": true,
+      "recon_mismatch": 0,
+      "errors": [
+        "未配置美股交叉上市，启用 PDF-only trust 模型",
+        "行业字段跳过: capex, gross_profit, operating_income"
+      ]
+    },
+    {
+      "id": "1211",
+      "name": "BYD",
+      "pdf": "/Users/xubaotian/pdf-intelligence/tests/benchmark/financial_hk/1211_annual.pdf",
+      "cross_list_us": null,
+      "verification_rate": 1.0,
+      "trust_score": 1.0,
+      "pdf_coverage_rate": 1.0,
+      "production_ready": true,
+      "recon_mismatch": 0,
+      "errors": [
+        "未配置美股交叉上市，启用 PDF-only trust 模型",
+        "行业字段跳过: gross_profit"
+      ]
+    }
+  ]
+}

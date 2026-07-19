@@ -1,0 +1,317 @@
+{
+  "cases": [
+    {
+      "name": "bordered_financial",
+      "pdf": "bordered_financial.pdf",
+      "page": 0,
+      "expected_rows": [
+        [
+          "Region",
+          "Q1",
+          "Q2",
+          "Q3",
+          "Q4"
+        ],
+        [
+          "North",
+          "100",
+          "120",
+          "130",
+          "140"
+        ],
+        [
+          "South",
+          "80",
+          "90",
+          "95",
+          "100"
+        ],
+        [
+          "East",
+          "60",
+          "70",
+          "75",
+          "80"
+        ],
+        [
+          "West",
+          "40",
+          "50",
+          "55",
+          "60"
+        ],
+        [
+          "合计",
+          "280",
+          "330",
+          "355",
+          "380"
+        ]
+      ],
+      "min_accuracy": 0.9
+    },
+    {
+      "name": "borderless_financial",
+      "pdf": "borderless_financial.pdf",
+      "page": 0,
+      "expected_rows": [
+        [
+          "Region",
+          "Q1",
+          "Q2",
+          "Q3",
+          "Q4"
+        ],
+        [
+          "North",
+          "100",
+          "120",
+          "130",
+          "140"
+        ],
+        [
+          "South",
+          "80",
+          "90",
+          "95",
+          "100"
+        ],
+        [
+          "East",
+          "60",
+          "70",
+          "75",
+          "80"
+        ],
+        [
+          "West",
+          "40",
+          "50",
+          "55",
+          "60"
+        ],
+        [
+          "合计",
+          "280",
+          "330",
+          "355",
+          "380"
+        ]
+      ],
+      "min_accuracy": 0.9
+    },
+    {
+      "name": "invoice",
+      "pdf": "invoice.pdf",
+      "page": 0,
+      "expected_rows": [
+        [
+          "Item",
+          "Qty",
+          "Unit Price",
+          "Amount"
+        ],
+        [
+          "Widget A",
+          "10",
+          "25.00",
+          "250.00"
+        ],
+        [
+          "Widget B",
+          "5",
+          "40.00",
+          "200.00"
+        ],
+        [
+          "Widget C",
+          "8",
+          "15.50",
+          "124.00"
+        ],
+        [
+          "合计",
+          "23",
+          "",
+          "574.00"
+        ]
+      ],
+      "min_accuracy": 0.9
+    },
+    {
+      "name": "budget_borderless",
+      "pdf": "budget_borderless.pdf",
+      "page": 0,
+      "expected_rows": [
+        [
+          "Department",
+          "Budget",
+          "Actual",
+          "Variance"
+        ],
+        [
+          "Sales",
+          "500000",
+          "520000",
+          "20000"
+        ],
+        [
+          "Marketing",
+          "200000",
+          "185000",
+          "-15000"
+        ],
+        [
+          "R&D",
+          "350000",
+          "360000",
+          "10000"
+        ],
+        [
+          "合计",
+          "1050000",
+          "1065000",
+          "15000"
+        ]
+      ],
+      "min_accuracy": 0.9
+    },
+    {
+      "name": "simple_two_column",
+      "pdf": "simple_two_column.pdf",
+      "page": 0,
+      "expected_rows": [
+        [
+          "Name",
+          "Score"
+        ],
+        [
+          "Alice",
+          "95"
+        ],
+        [
+          "Bob",
+          "87"
+        ],
+        [
+          "Carol",
+          "92"
+        ],
+        [
+          "合计",
+          "274"
+        ]
+      ],
+      "min_accuracy": 0.9
+    },
+    {
+      "name": "mixed_layout",
+      "pdf": "mixed_layout.pdf",
+      "page": 0,
+      "expected_rows": [
+        [
+          "Region",
+          "Q1",
+          "Q2",
+          "Q3",
+          "Q4"
+        ],
+        [
+          "North",
+          "100",
+          "120",
+          "130",
+          "140"
+        ],
+        [
+          "South",
+          "80",
+          "90",
+          "95",
+          "100"
+        ],
+        [
+          "East",
+          "60",
+          "70",
+          "75",
+          "80"
+        ],
+        [
+          "West",
+          "40",
+          "50",
+          "55",
+          "60"
+        ],
+        [
+          "合计",
+          "280",
+          "330",
+          "355",
+          "380"
+        ]
+      ],
+      "min_accuracy": 0.9
+    },
+    {
+      "name": "multi_page_report_p1",
+      "pdf": "multi_page_report.pdf",
+      "page": 0,
+      "expected_rows": [
+        [
+          "Region",
+          "Q1",
+          "Q2",
+          "Q3",
+          "Q4"
+        ],
+        [
+          "North",
+          "100",
+          "120",
+          "130",
+          "140"
+        ],
+        [
+          "South",
+          "80",
+          "90",
+          "95",
+          "100"
+        ],
+        [
+          "East",
+          "60",
+          "70",
+          "75",
+          "80"
+        ]
+      ],
+      "min_accuracy": 0.9
+    },
+    {
+      "name": "multi_page_report_p2",
+      "pdf": "multi_page_report.pdf",
+      "page": 1,
+      "expected_rows": [
+        [
+          "Region",
+          "Q1",
+          "Q2",
+          "Q3",
+          "Q4"
+        ],
+        [
+          "West",
+          "40",
+          "50",
+          "55",
+          "60"
+        ]
+      ],
+      "min_accuracy": 0.9
+    }
+  ],
+  "target_overall_accuracy": 0.9
+}

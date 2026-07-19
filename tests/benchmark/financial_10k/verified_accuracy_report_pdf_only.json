@@ -1,0 +1,422 @@
+{
+  "pipeline": "verified_financials (SEC XBRL × PDF text)",
+  "corpus": "financial_10k_corpus",
+  "template_count": 20,
+  "tested_count": 20,
+  "missing_templates": [],
+  "hk_templates": "无 — tests/benchmark/financial_hk/ 为空，需先找港股年报 PDF",
+  "overall_pdf_extraction_accuracy": 1.0,
+  "overall_verification_rate": 0.9325,
+  "overall_trust_score": 0.9309,
+  "overall_pdf_coverage_rate": 1.0,
+  "total_reconciliation_mismatches": 12,
+  "threshold_go": 0.9,
+  "threshold_stop": 0.8,
+  "verdict": "GO — 模版准确度达标，可继续产品化",
+  "tier_stats": {
+    "A": {
+      "count": 13,
+      "pdf_extraction_accuracy": 1.0
+    },
+    "B": {
+      "count": 4,
+      "pdf_extraction_accuracy": 1.0
+    },
+    "C": {
+      "count": 3,
+      "pdf_extraction_accuracy": 1.0
+    }
+  },
+  "companies": [
+    {
+      "id": "AAPL",
+      "name": "Apple",
+      "pdf": "/Users/xubaotian/pdf-intelligence/data/samples/apple_2024_annual_report_10k.pdf",
+      "tier": "A",
+      "pdf_extraction_accuracy": 1.0,
+      "verification_rate": 1.0,
+      "trust_score": 1.0,
+      "pdf_coverage_rate": 1.0,
+      "production_ready": true,
+      "recon_matched": 35,
+      "recon_mismatch": 0,
+      "field_hits": "32/32",
+      "errors": [
+        "缺少报表网格: cashflow"
+      ],
+      "misses": []
+    },
+    {
+      "id": "MSFT",
+      "name": "Microsoft",
+      "pdf": "/Users/xubaotian/pdf-intelligence/tests/benchmark/financial_10k/msft_2024_10k.pdf",
+      "tier": "A",
+      "pdf_extraction_accuracy": 1.0,
+      "verification_rate": 1.0,
+      "trust_score": 1.0,
+      "pdf_coverage_rate": 1.0,
+      "production_ready": true,
+      "recon_matched": 35,
+      "recon_mismatch": 0,
+      "field_hits": "32/32",
+      "errors": [
+        "缺少报表网格: balance",
+        "缺少报表网格: income"
+      ],
+      "misses": []
+    },
+    {
+      "id": "GOOGL",
+      "name": "Alphabet",
+      "pdf": "/Users/xubaotian/pdf-intelligence/tests/benchmark/financial_10k/googl_2024_10k.pdf",
+      "tier": "A",
+      "pdf_extraction_accuracy": 1.0,
+      "verification_rate": 1.0,
+      "trust_score": 1.0,
+      "pdf_coverage_rate": 1.0,
+      "production_ready": true,
+      "recon_matched": 31,
+      "recon_mismatch": 0,
+      "field_hits": "29/29",
+      "errors": [
+        "缺少 XBRL 标签: gross_profit",
+        "PDF 未提取到: gross_profit"
+      ],
+      "misses": []
+    },
+    {
+      "id": "AMZN",
+      "name": "Amazon",
+      "pdf": "/Users/xubaotian/pdf-intelligence/tests/benchmark/financial_10k/amzn_2024_10k.pdf",
+      "tier": "A",
+      "pdf_extraction_accuracy": 1.0,
+      "verification_rate": 1.0,
+      "trust_score": 0.9688,
+      "pdf_coverage_rate": 1.0,
+      "production_ready": true,
+      "recon_matched": 30,
+      "recon_mismatch": 0,
+      "field_hits": "30/30",
+      "errors": [
+        "PDF 未提取到: gross_profit"
+      ],
+      "misses": []
+    },
+    {
+      "id": "META",
+      "name": "Meta",
+      "pdf": "/Users/xubaotian/pdf-intelligence/tests/benchmark/financial_10k/meta_2024_10k.pdf",
+      "tier": "A",
+      "pdf_extraction_accuracy": 1.0,
+      "verification_rate": 1.0,
+      "trust_score": 1.0,
+      "pdf_coverage_rate": 1.0,
+      "production_ready": true,
+      "recon_matched": 32,
+      "recon_mismatch": 0,
+      "field_hits": "29/29",
+      "errors": [
+        "缺少 XBRL 标签: gross_profit",
+        "PDF 未提取到: gross_profit"
+      ],
+      "misses": []
+    },
+    {
+      "id": "NVDA",
+      "name": "NVIDIA",
+      "pdf": "/Users/xubaotian/pdf-intelligence/tests/benchmark/financial_10k/nvda_2024_10k.pdf",
+      "tier": "A",
+      "pdf_extraction_accuracy": 1.0,
+      "verification_rate": 1.0,
+      "trust_score": 1.0,
+      "pdf_coverage_rate": 1.0,
+      "production_ready": true,
+      "recon_matched": 35,
+      "recon_mismatch": 0,
+      "field_hits": "29/29",
+      "errors": [],
+      "misses": []
+    },
+    {
+      "id": "JNJ",
+      "name": "Johnson & Johnson",
+      "pdf": "/Users/xubaotian/pdf-intelligence/tests/benchmark/financial_10k/jnj_2024_10k.pdf",
+      "tier": "A",
+      "pdf_extraction_accuracy": 1.0,
+      "verification_rate": 1.0,
+      "trust_score": 1.0,
+      "pdf_coverage_rate": 1.0,
+      "production_ready": true,
+      "recon_matched": 24,
+      "recon_mismatch": 0,
+      "field_hits": "27/27",
+      "errors": [
+        "缺少报表网格: cashflow",
+        "PDF 未提取到: operating_income"
+      ],
+      "misses": []
+    },
+    {
+      "id": "WMT",
+      "name": "Walmart",
+      "pdf": "/Users/xubaotian/pdf-intelligence/tests/benchmark/financial_10k/wmt_2024_10k.pdf",
+      "tier": "A",
+      "pdf_extraction_accuracy": 1.0,
+      "verification_rate": 0.8888888888888888,
+      "trust_score": 0.8889,
+      "pdf_coverage_rate": 1.0,
+      "production_ready": false,
+      "recon_matched": 24,
+      "recon_mismatch": 3,
+      "field_hits": "27/27",
+      "errors": [
+        "缺少 XBRL 标签: gross_profit",
+        "缺少 XBRL 标签: total_liabilities",
+        "缺少报表网格: balance",
+        "PDF 未提取到: gross_profit",
+        "PDF 未提取到: eps_basic"
+      ],
+      "misses": []
+    },
+    {
+      "id": "CRM",
+      "name": "Salesforce",
+      "pdf": "/Users/xubaotian/pdf-intelligence/tests/benchmark/financial_10k/crm_10k.htm",
+      "tier": "C",
+      "pdf_extraction_accuracy": 1.0,
+      "verification_rate": 1.0,
+      "trust_score": 1.0,
+      "pdf_coverage_rate": 1.0,
+      "production_ready": true,
+      "recon_matched": 35,
+      "recon_mismatch": 0,
+      "field_hits": "35/35",
+      "errors": [],
+      "misses": []
+    },
+    {
+      "id": "INTC",
+      "name": "Intel",
+      "pdf": "/Users/xubaotian/pdf-intelligence/tests/benchmark/financial_10k/intc_2024_10k.pdf",
+      "tier": "A",
+      "pdf_extraction_accuracy": 1.0,
+      "verification_rate": 0.9310344827586207,
+      "trust_score": 0.931,
+      "pdf_coverage_rate": 1.0,
+      "production_ready": false,
+      "recon_matched": 27,
+      "recon_mismatch": 2,
+      "field_hits": "30/30",
+      "errors": [
+        "缺少 XBRL 标签: total_liabilities",
+        "缺少报表网格: balance",
+        "PDF 未提取到: total_liabilities",
+        "PDF 未提取到: capex"
+      ],
+      "misses": []
+    },
+    {
+      "id": "AMD",
+      "name": "AMD",
+      "pdf": "/Users/xubaotian/pdf-intelligence/tests/benchmark/financial_10k/amd_2024_10k.pdf",
+      "tier": "B",
+      "pdf_extraction_accuracy": 1.0,
+      "verification_rate": 1.0,
+      "trust_score": 1.0,
+      "pdf_coverage_rate": 1.0,
+      "production_ready": true,
+      "recon_matched": 33,
+      "recon_mismatch": 0,
+      "field_hits": "19/19",
+      "errors": [
+        "缺少 XBRL 标签: total_liabilities"
+      ],
+      "misses": []
+    },
+    {
+      "id": "AVGO",
+      "name": "Broadcom",
+      "pdf": "/Users/xubaotian/pdf-intelligence/tests/benchmark/financial_10k/avgo_2024_10k.pdf",
+      "tier": "A",
+      "pdf_extraction_accuracy": 1.0,
+      "verification_rate": 1.0,
+      "trust_score": 1.0,
+      "pdf_coverage_rate": 1.0,
+      "production_ready": true,
+      "recon_matched": 32,
+      "recon_mismatch": 0,
+      "field_hits": "32/32",
+      "errors": [
+        "缺少报表网格: balance",
+        "PDF 未提取到: eps_basic"
+      ],
+      "misses": []
+    },
+    {
+      "id": "NFLX",
+      "name": "Netflix",
+      "pdf": "/Users/xubaotian/pdf-intelligence/tests/benchmark/financial_10k/nflx_2024_10k.pdf",
+      "tier": "A",
+      "pdf_extraction_accuracy": 1.0,
+      "verification_rate": 1.0,
+      "trust_score": 1.0,
+      "pdf_coverage_rate": 1.0,
+      "production_ready": true,
+      "recon_matched": 29,
+      "recon_mismatch": 0,
+      "field_hits": "21/21",
+      "errors": [
+        "PDF 未提取到: revenue",
+        "PDF 未提取到: gross_profit"
+      ],
+      "misses": []
+    },
+    {
+      "id": "TSLA",
+      "name": "Tesla",
+      "pdf": "/Users/xubaotian/pdf-intelligence/tests/benchmark/financial_10k/tsla_10k.htm",
+      "tier": "C",
+      "pdf_extraction_accuracy": 1.0,
+      "verification_rate": 0.9230769230769231,
+      "trust_score": 0.9231,
+      "pdf_coverage_rate": 1.0,
+      "production_ready": false,
+      "recon_matched": 24,
+      "recon_mismatch": 2,
+      "field_hits": "35/35",
+      "errors": [],
+      "misses": []
+    },
+    {
+      "id": "UNH",
+      "name": "UnitedHealth",
+      "pdf": "/Users/xubaotian/pdf-intelligence/tests/benchmark/financial_10k/unh_10k.htm",
+      "tier": "B",
+      "pdf_extraction_accuracy": 1.0,
+      "verification_rate": 0.90625,
+      "trust_score": 0.9062,
+      "pdf_coverage_rate": 1.0,
+      "production_ready": false,
+      "recon_matched": 29,
+      "recon_mismatch": 3,
+      "field_hits": "24/24",
+      "errors": [
+        "缺少 XBRL 标签: gross_profit",
+        "PDF 未提取到: gross_profit"
+      ],
+      "misses": []
+    },
+    {
+      "id": "HD",
+      "name": "Home Depot",
+      "pdf": "/Users/xubaotian/pdf-intelligence/tests/benchmark/financial_10k/hd_10k.htm",
+      "tier": "C",
+      "pdf_extraction_accuracy": 1.0,
+      "verification_rate": 1.0,
+      "trust_score": 1.0,
+      "pdf_coverage_rate": 1.0,
+      "production_ready": true,
+      "recon_matched": 31,
+      "recon_mismatch": 0,
+      "field_hits": "32/32",
+      "errors": [],
+      "misses": []
+    },
+    {
+      "id": "LLY",
+      "name": "Eli Lilly",
+      "pdf": "/Users/xubaotian/pdf-intelligence/tests/benchmark/financial_10k/lly_10k.htm",
+      "tier": "A",
+      "pdf_extraction_accuracy": 1.0,
+      "verification_rate": 1.0,
+      "trust_score": 1.0,
+      "pdf_coverage_rate": 1.0,
+      "production_ready": true,
+      "recon_matched": 26,
+      "recon_mismatch": 0,
+      "field_hits": "20/20",
+      "errors": [
+        "缺少 XBRL 标签: gross_profit",
+        "缺少 XBRL 标签: operating_income",
+        "缺少 XBRL 标签: capex",
+        "PDF 未提取到: gross_profit",
+        "PDF 未提取到: operating_income"
+      ],
+      "misses": []
+    },
+    {
+      "id": "V",
+      "name": "Visa",
+      "pdf": "/Users/xubaotian/pdf-intelligence/tests/benchmark/financial_10k/v_2024_10k.pdf",
+      "tier": "B",
+      "pdf_extraction_accuracy": 1.0,
+      "verification_rate": 1.0,
+      "trust_score": 1.0,
+      "pdf_coverage_rate": 1.0,
+      "production_ready": true,
+      "recon_matched": 21,
+      "recon_mismatch": 0,
+      "field_hits": "24/24",
+      "errors": [
+        "缺少 XBRL 标签: gross_profit",
+        "缺少 XBRL 标签: eps_basic",
+        "PDF 未提取到: revenue",
+        "PDF 未提取到: gross_profit",
+        "PDF 未提取到: total_equity",
+        "PDF 未提取到: capex"
+      ],
+      "misses": []
+    },
+    {
+      "id": "MA",
+      "name": "Mastercard",
+      "pdf": "/Users/xubaotian/pdf-intelligence/tests/benchmark/financial_10k/ma_2024_10k.pdf",
+      "tier": "A",
+      "pdf_extraction_accuracy": 1.0,
+      "verification_rate": 1.0,
+      "trust_score": 1.0,
+      "pdf_coverage_rate": 1.0,
+      "production_ready": true,
+      "recon_matched": 32,
+      "recon_mismatch": 0,
+      "field_hits": "27/27",
+      "errors": [
+        "缺少 XBRL 标签: gross_profit",
+        "PDF 未提取到: gross_profit"
+      ],
+      "misses": []
+    },
+    {
+      "id": "JPM",
+      "name": "JPMorgan",
+      "pdf": "/Users/xubaotian/pdf-intelligence/tests/benchmark/financial_10k/jpm_2024_10k.pdf",
+      "tier": "B",
+      "pdf_extraction_accuracy": 1.0,
+      "verification_rate": 0.0,
+      "trust_score": 0.0,
+      "pdf_coverage_rate": 1.0,
+      "production_ready": false,
+      "recon_matched": 0,
+      "recon_mismatch": 2,
+      "field_hits": "2/2",
+      "errors": [
+        "缺少 XBRL 标签: gross_profit",
+        "缺少 XBRL 标签: operating_income",
+        "缺少 XBRL 标签: capex",
+        "PDF 未提取到: revenue",
+        "PDF 未提取到: gross_profit",
+        "PDF 未提取到: operating_income",
+        "PDF 未提取到: net_income",
+        "PDF 未提取到: eps_basic",
+        "PDF 未提取到: total_liabilities",
+        "PDF 未提取到: total_equity",
+        "PDF 未提取到: cash",
+        "PDF 未提取到: cfo",
+        "PDF 未提取到: cfi",
+        "PDF 未提取到: cff",
+        "PDF 未提取到: capex"
+      ],
+      "misses": []
+    }
+  ]
+}

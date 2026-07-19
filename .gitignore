@@ -1,0 +1,65 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+*.egg-info/
+dist/
+build/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Environment & Secrets
+.env
+*.env.local
+*.env.production
+
+# Data
+data/uploads/*
+data/outputs/*
+data/filings/*
+data/feedback/*
+data/auth.db
+data/auth.db-shm
+data/auth.db-wal
+data/test_pdfs/*
+data/test_outputs/*
+data/samples/*
+data/docling-models/*
+data/tableformer-model/*
+!data/.gitkeep
+
+# Test benchmarks (large files)
+tests/benchmark/financial_10k/*.pdf
+tests/benchmark/financial_10k/*.htm
+tests/benchmark/financial_hk/*.pdf
+tests/benchmark/financial_esef/*.xhtml
+tests/benchmark/corpus/*.pdf
+tests/fixtures/*.pdf
+
+# Screenshots
+*.png
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Jupyter
+.ipynb_checkpoints/
+
+# pytest
+.pytest_cache/
+
+# Ruff
+.ruff_cache/
+data/tableformer-model/

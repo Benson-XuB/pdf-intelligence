@@ -1,0 +1,450 @@
+{
+  "pipeline": "verified_financials (SEC XBRL × PDF text)",
+  "corpus": "financial_10k_pdf_only_tier_a",
+  "template_count": 12,
+  "tested_count": 12,
+  "missing_templates": [],
+  "hk_templates": "无 — tests/benchmark/financial_hk/ 为空，需先找港股年报 PDF",
+  "overall_pdf_extraction_accuracy": 0.9272,
+  "overall_verification_rate": 0.7382,
+  "total_reconciliation_mismatches": 33,
+  "threshold_go": 0.9,
+  "threshold_stop": 0.8,
+  "verdict": "GO — 模版准确度达标，可继续产品化",
+  "tier_stats": {
+    "A": {
+      "count": 12,
+      "pdf_extraction_accuracy": 0.9272
+    }
+  },
+  "companies": [
+    {
+      "id": "AAPL",
+      "name": "Apple",
+      "pdf": "/Users/xubaotian/pdf-intelligence/data/samples/apple_2024_annual_report_10k.pdf",
+      "tier": "A",
+      "pdf_extraction_accuracy": 0.875,
+      "verification_rate": 1.0,
+      "trust_score": 0.9462,
+      "production_ready": true,
+      "recon_matched": 32,
+      "recon_mismatch": 0,
+      "field_hits": "21/24",
+      "errors": [
+        "PDF 未提取到: eps_basic",
+        "缺少报表网格: cashflow",
+        "缺少报表网格: cashflow",
+        "缺少报表网格: cashflow",
+        "缺少报表网格: cashflow",
+        "PDF 未提取到: capex"
+      ],
+      "misses": [
+        {
+          "field_id": "revenue",
+          "gt_key": "total_net_sales",
+          "period_index": 0,
+          "expected": 294866.0,
+          "actual": 391035.0,
+          "matched": false
+        },
+        {
+          "field_id": "revenue",
+          "gt_key": "total_net_sales",
+          "period_index": 1,
+          "expected": 298085.0,
+          "actual": 383285.0,
+          "matched": false
+        },
+        {
+          "field_id": "revenue",
+          "gt_key": "total_net_sales",
+          "period_index": 2,
+          "expected": 316199.0,
+          "actual": 394328.0,
+          "matched": false
+        }
+      ]
+    },
+    {
+      "id": "MSFT",
+      "name": "Microsoft",
+      "pdf": "/Users/xubaotian/pdf-intelligence/tests/benchmark/financial_10k/msft_2024_10k.pdf",
+      "tier": "A",
+      "pdf_extraction_accuracy": 1.0,
+      "verification_rate": 1.0,
+      "trust_score": 0.7692,
+      "production_ready": true,
+      "recon_matched": 9,
+      "recon_mismatch": 0,
+      "field_hits": "9/9",
+      "errors": [
+        "缺少报表网格: income",
+        "缺少报表网格: income",
+        "缺少报表网格: income",
+        "缺少报表网格: income",
+        "缺少报表网格: income",
+        "缺少报表网格: balance",
+        "缺少报表网格: balance",
+        "缺少报表网格: balance",
+        "缺少报表网格: balance",
+        "PDF 未提取到: capex",
+        "缺少报表页: income",
+        "缺少报表页: income",
+        "缺少报表页: income",
+        "缺少报表页: income",
+        "缺少报表页: income",
+        "PDF 未提取到: total_assets",
+        "PDF 未提取到: total_liabilities",
+        "PDF 未提取到: total_equity",
+        "PDF 未提取到: cash",
+        "PDF 未提取到: capex"
+      ],
+      "misses": []
+    },
+    {
+      "id": "GOOGL",
+      "name": "Alphabet",
+      "pdf": "/Users/xubaotian/pdf-intelligence/tests/benchmark/financial_10k/googl_2024_10k.pdf",
+      "tier": "A",
+      "pdf_extraction_accuracy": 1.0,
+      "verification_rate": 1.0,
+      "trust_score": 0.8923,
+      "production_ready": true,
+      "recon_matched": 32,
+      "recon_mismatch": 0,
+      "field_hits": "24/24",
+      "errors": [
+        "缺少 XBRL 标签: gross_profit",
+        "PDF 未提取到: gross_profit",
+        "PDF 未提取到: total_liabilities",
+        "PDF 未提取到: total_equity",
+        "PDF 未提取到: cash",
+        "PDF 未提取到: gross_profit"
+      ],
+      "misses": []
+    },
+    {
+      "id": "AMZN",
+      "name": "Amazon",
+      "pdf": "/Users/xubaotian/pdf-intelligence/tests/benchmark/financial_10k/amzn_2024_10k.pdf",
+      "tier": "A",
+      "pdf_extraction_accuracy": 0.8636,
+      "verification_rate": 1.0,
+      "trust_score": 0.7846,
+      "production_ready": true,
+      "recon_matched": 27,
+      "recon_mismatch": 0,
+      "field_hits": "19/22",
+      "errors": [
+        "PDF 未提取到: revenue",
+        "PDF 未提取到: gross_profit",
+        "PDF 未提取到: total_liabilities",
+        "PDF 未提取到: cff",
+        "PDF 未提取到: gross_profit",
+        "PDF 未提取到: total_liabilities"
+      ],
+      "misses": [
+        {
+          "field_id": "revenue",
+          "gt_key": "total_net_sales",
+          "period_index": 0,
+          "expected": 242901.0,
+          "actual": 513983.0,
+          "matched": false
+        },
+        {
+          "field_id": "revenue",
+          "gt_key": "total_net_sales",
+          "period_index": 1,
+          "expected": 255887.0,
+          "actual": 574785.0,
+          "matched": false
+        },
+        {
+          "field_id": "revenue",
+          "gt_key": "total_net_sales",
+          "period_index": 2,
+          "expected": 272311.0,
+          "actual": 637959.0,
+          "matched": false
+        }
+      ]
+    },
+    {
+      "id": "META",
+      "name": "Meta",
+      "pdf": "/Users/xubaotian/pdf-intelligence/tests/benchmark/financial_10k/meta_2024_10k.pdf",
+      "tier": "A",
+      "pdf_extraction_accuracy": 1.0,
+      "verification_rate": 1.0,
+      "trust_score": 0.8923,
+      "production_ready": true,
+      "recon_matched": 32,
+      "recon_mismatch": 0,
+      "field_hits": "24/24",
+      "errors": [
+        "缺少 XBRL 标签: gross_profit",
+        "PDF 未提取到: gross_profit",
+        "PDF 未提取到: eps_basic",
+        "PDF 未提取到: gross_profit"
+      ],
+      "misses": []
+    },
+    {
+      "id": "NVDA",
+      "name": "NVIDIA",
+      "pdf": "/Users/xubaotian/pdf-intelligence/tests/benchmark/financial_10k/nvda_2024_10k.pdf",
+      "tier": "A",
+      "pdf_extraction_accuracy": 0.0,
+      "verification_rate": 0.0,
+      "trust_score": 0.5923,
+      "production_ready": false,
+      "recon_matched": 0,
+      "recon_mismatch": 0,
+      "field_hits": "0/0",
+      "errors": [
+        "PDF 与 XBRL 期间无法对齐，仅输出 XBRL 数据",
+        "未在文档中定位到三大财务报表页面"
+      ],
+      "misses": []
+    },
+    {
+      "id": "JNJ",
+      "name": "Johnson & Johnson",
+      "pdf": "/Users/xubaotian/pdf-intelligence/tests/benchmark/financial_10k/jnj_2024_10k.pdf",
+      "tier": "A",
+      "pdf_extraction_accuracy": 0.8667,
+      "verification_rate": 0.5,
+      "trust_score": 0.5231,
+      "production_ready": false,
+      "recon_matched": 8,
+      "recon_mismatch": 8,
+      "field_hits": "13/15",
+      "errors": [
+        "PDF 未提取到: revenue",
+        "PDF 未提取到: operating_income",
+        "PDF 未提取到: eps_basic",
+        "缺少报表网格: cashflow",
+        "缺少报表网格: cashflow",
+        "缺少报表网格: cashflow",
+        "缺少报表网格: cashflow",
+        "PDF 未提取到: operating_income",
+        "PDF 未提取到: cfo",
+        "PDF 未提取到: cfi",
+        "PDF 未提取到: cff",
+        "PDF 未提取到: capex"
+      ],
+      "misses": [
+        {
+          "field_id": "net_income",
+          "gt_key": "net_income",
+          "period_index": 1,
+          "expected": 13326.0,
+          "actual": 35153.0,
+          "matched": false
+        },
+        {
+          "field_id": "net_income",
+          "gt_key": "net_income",
+          "period_index": 2,
+          "expected": 16370.0,
+          "actual": 17941.0,
+          "matched": false
+        }
+      ]
+    },
+    {
+      "id": "WMT",
+      "name": "Walmart",
+      "pdf": "/Users/xubaotian/pdf-intelligence/tests/benchmark/financial_10k/wmt_2024_10k.pdf",
+      "tier": "A",
+      "pdf_extraction_accuracy": 0.8636,
+      "verification_rate": 0.7037037037037037,
+      "trust_score": 0.6205,
+      "production_ready": false,
+      "recon_matched": 19,
+      "recon_mismatch": 8,
+      "field_hits": "19/22",
+      "errors": [
+        "缺少 XBRL 标签: gross_profit",
+        "缺少 XBRL 标签: total_liabilities",
+        "PDF 未提取到: gross_profit",
+        "PDF 未提取到: capex"
+      ],
+      "misses": [
+        {
+          "field_id": "revenue",
+          "gt_key": "total_net_sales",
+          "period_index": 0,
+          "expected": 674538.0,
+          "actual": 680985.0,
+          "matched": false
+        },
+        {
+          "field_id": "revenue",
+          "gt_key": "total_net_sales",
+          "period_index": 1,
+          "expected": 642637.0,
+          "actual": 648125.0,
+          "matched": false
+        },
+        {
+          "field_id": "revenue",
+          "gt_key": "total_net_sales",
+          "period_index": 2,
+          "expected": 605881.0,
+          "actual": 611289.0,
+          "matched": false
+        }
+      ]
+    },
+    {
+      "id": "INTC",
+      "name": "Intel",
+      "pdf": "/Users/xubaotian/pdf-intelligence/tests/benchmark/financial_10k/intc_2024_10k.pdf",
+      "tier": "A",
+      "pdf_extraction_accuracy": 1.0,
+      "verification_rate": 0.6086956521739131,
+      "trust_score": 0.5692,
+      "production_ready": false,
+      "recon_matched": 14,
+      "recon_mismatch": 9,
+      "field_hits": "16/16",
+      "errors": [
+        "缺少 XBRL 标签: total_liabilities",
+        "PDF 未提取到: revenue",
+        "PDF 未提取到: gross_profit",
+        "PDF 未提取到: operating_income",
+        "PDF 未提取到: net_income",
+        "PDF 未提取到: eps_basic",
+        "缺少报表网格: balance",
+        "缺少报表网格: balance",
+        "缺少报表网格: balance",
+        "缺少报表网格: balance",
+        "PDF 未提取到: cfo",
+        "PDF 未提取到: cfi",
+        "PDF 未提取到: cff",
+        "PDF 未提取到: capex",
+        "PDF 未提取到: total_liabilities",
+        "PDF 未提取到: cfi",
+        "PDF 未提取到: cff",
+        "PDF 未提取到: capex"
+      ],
+      "misses": []
+    },
+    {
+      "id": "AVGO",
+      "name": "Broadcom",
+      "pdf": "/Users/xubaotian/pdf-intelligence/tests/benchmark/financial_10k/avgo_2024_10k.pdf",
+      "tier": "A",
+      "pdf_extraction_accuracy": 0.88,
+      "verification_rate": 0.9333333333333333,
+      "trust_score": 0.8513,
+      "production_ready": false,
+      "recon_matched": 28,
+      "recon_mismatch": 2,
+      "field_hits": "22/25",
+      "errors": [
+        "PDF 未提取到: capex"
+      ],
+      "misses": [
+        {
+          "field_id": "revenue",
+          "gt_key": "total_net_sales",
+          "period_index": 0,
+          "expected": 30359.0,
+          "actual": 51574.0,
+          "matched": false
+        },
+        {
+          "field_id": "revenue",
+          "gt_key": "total_net_sales",
+          "period_index": 1,
+          "expected": 27891.0,
+          "actual": 35819.0,
+          "matched": false
+        },
+        {
+          "field_id": "revenue",
+          "gt_key": "total_net_sales",
+          "period_index": 2,
+          "expected": 26277.0,
+          "actual": 33203.0,
+          "matched": false
+        }
+      ]
+    },
+    {
+      "id": "NFLX",
+      "name": "Netflix",
+      "pdf": "/Users/xubaotian/pdf-intelligence/tests/benchmark/financial_10k/nflx_2024_10k.pdf",
+      "tier": "A",
+      "pdf_extraction_accuracy": 0.6667,
+      "verification_rate": 0.2,
+      "trust_score": 0.5821,
+      "production_ready": false,
+      "recon_matched": 1,
+      "recon_mismatch": 4,
+      "field_hits": "2/3",
+      "errors": [
+        "PDF 未提取到: revenue",
+        "PDF 未提取到: gross_profit",
+        "PDF 未提取到: operating_income",
+        "PDF 未提取到: net_income",
+        "PDF 未提取到: eps_basic",
+        "PDF 未提取到: total_assets",
+        "PDF 未提取到: total_liabilities",
+        "PDF 未提取到: total_equity",
+        "PDF 未提取到: cash",
+        "缺少报表网格: cashflow",
+        "缺少报表网格: cashflow",
+        "缺少报表网格: cashflow",
+        "缺少报表网格: cashflow",
+        "PDF 未提取到: revenue",
+        "PDF 未提取到: gross_profit",
+        "PDF 未提取到: operating_income",
+        "PDF 未提取到: net_income",
+        "PDF 未提取到: total_assets",
+        "PDF 未提取到: total_liabilities",
+        "PDF 未提取到: total_equity",
+        "PDF 未提取到: cash",
+        "PDF 未提取到: cfo",
+        "PDF 未提取到: capex"
+      ],
+      "misses": [
+        {
+          "field_id": "revenue",
+          "gt_key": "total_net_sales",
+          "period_index": 0,
+          "expected": 19168.0,
+          "actual": null,
+          "matched": false
+        }
+      ]
+    },
+    {
+      "id": "MA",
+      "name": "Mastercard",
+      "pdf": "/Users/xubaotian/pdf-intelligence/tests/benchmark/financial_10k/ma_2024_10k.pdf",
+      "tier": "A",
+      "pdf_extraction_accuracy": 1.0,
+      "verification_rate": 0.9130434782608695,
+      "trust_score": 0.741,
+      "production_ready": false,
+      "recon_matched": 21,
+      "recon_mismatch": 2,
+      "field_hits": "22/22",
+      "errors": [
+        "缺少 XBRL 标签: gross_profit",
+        "PDF 未提取到: gross_profit",
+        "缺少报表网格: cashflow",
+        "缺少报表网格: cashflow",
+        "缺少报表网格: cashflow",
+        "缺少报表网格: cashflow",
+        "PDF 未提取到: gross_profit",
+        "PDF 未提取到: capex"
+      ],
+      "misses": []
+    }
+  ]
+}

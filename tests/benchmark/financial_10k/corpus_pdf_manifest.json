@@ -1,0 +1,74 @@
+{
+  "available": 18,
+  "total": 20,
+  "downloaded": [
+    {
+      "id": "WMT",
+      "dest": "/Users/xubaotian/pdf-intelligence/tests/benchmark/financial_10k/wmt_2024_10k.pdf",
+      "url": "https://www.sec.gov/Archives/edgar/data/104169/000010416925000059/walmartannualreport2025.pdf",
+      "source": "sec_ars",
+      "size_mb": 11.34
+    },
+    {
+      "id": "CRM",
+      "dest": "/Users/xubaotian/pdf-intelligence/tests/benchmark/financial_10k/crm_2024_10k.pdf",
+      "url": "https://www.sec.gov/Archives/edgar/data/1108524/000110852425000019/salesforce_fy25annualreport.pdf",
+      "source": "sec_ars",
+      "size_mb": 4.24
+    },
+    {
+      "id": "INTC",
+      "dest": "/Users/xubaotian/pdf-intelligence/tests/benchmark/financial_10k/intc_2024_10k.pdf",
+      "url": "https://www.sec.gov/Archives/edgar/data/50863/000005086325000052/a2024arsform10-k.pdf",
+      "source": "sec_ars",
+      "size_mb": 9.11
+    },
+    {
+      "id": "AMD",
+      "dest": "/Users/xubaotian/pdf-intelligence/tests/benchmark/financial_10k/amd_2024_10k.pdf",
+      "url": "https://www.sec.gov/Archives/edgar/data/2488/000119312525067185/d858533dars.pdf",
+      "source": "sec_ars",
+      "size_mb": 24.59
+    },
+    {
+      "id": "AVGO",
+      "dest": "/Users/xubaotian/pdf-intelligence/tests/benchmark/financial_10k/avgo_2024_10k.pdf",
+      "url": "https://www.sec.gov/Archives/edgar/data/1730168/000119312525044131/d886393dars.pdf",
+      "source": "sec_ars",
+      "size_mb": 0.96
+    },
+    {
+      "id": "NFLX",
+      "dest": "/Users/xubaotian/pdf-intelligence/tests/benchmark/financial_10k/nflx_2024_10k.pdf",
+      "url": "https://www.sec.gov/Archives/edgar/data/1065280/000119312525084431/d914423dars.pdf",
+      "source": "sec_ars",
+      "size_mb": 0.36
+    },
+    {
+      "id": "V",
+      "dest": "/Users/xubaotian/pdf-intelligence/tests/benchmark/financial_10k/v_2024_10k.pdf",
+      "url": "https://www.sec.gov/Archives/edgar/data/1403161/000130817925000637/v014524-ars.pdf",
+      "source": "sec_ars",
+      "size_mb": 9.2
+    },
+    {
+      "id": "MA",
+      "dest": "/Users/xubaotian/pdf-intelligence/tests/benchmark/financial_10k/ma_2024_10k.pdf",
+      "url": "https://www.sec.gov/Archives/edgar/data/1141391/000114139126000025/ma12312025-10xkasfiled.pdf",
+      "source": "sec_ars",
+      "size_mb": 10.22
+    }
+  ],
+  "errors": [
+    {
+      "id": "UNH",
+      "ir_error": "响应不是 PDF 文件",
+      "sec_error": "UNH 无 SEC ARS PDF 附表"
+    },
+    {
+      "id": "LLY",
+      "ir_error": "HTTP Error 404: Not Found",
+      "sec_error": "LLY 无 SEC ARS PDF 附表"
+    }
+  ]
+}

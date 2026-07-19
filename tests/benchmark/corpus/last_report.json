@@ -1,0 +1,54 @@
+{
+  "overall": 0.9625,
+  "target": 0.9,
+  "cases": [
+    {
+      "case_name": "bordered_financial",
+      "accuracy": 0.9667,
+      "passed": true,
+      "source": "pdfplumber"
+    },
+    {
+      "case_name": "borderless_financial",
+      "accuracy": 0.9667,
+      "passed": true,
+      "source": "pdfplumber"
+    },
+    {
+      "case_name": "invoice",
+      "accuracy": 0.95,
+      "passed": true,
+      "source": "pdfplumber"
+    },
+    {
+      "case_name": "budget_borderless",
+      "accuracy": 0.95,
+      "passed": true,
+      "source": "pdfplumber"
+    },
+    {
+      "case_name": "simple_two_column",
+      "accuracy": 0.9,
+      "passed": true,
+      "source": "pdfplumber"
+    },
+    {
+      "case_name": "mixed_layout",
+      "accuracy": 0.9667,
+      "passed": true,
+      "source": "pdfplumber"
+    },
+    {
+      "case_name": "multi_page_report_p1",
+      "accuracy": 1.0,
+      "passed": true,
+      "source": "pdfplumber"
+    },
+    {
+      "case_name": "multi_page_report_p2",
+      "accuracy": 1.0,
+      "passed": true,
+      "source": "pdfplumber"
+    }
+  ]
+}

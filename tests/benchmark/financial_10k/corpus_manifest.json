@@ -1,0 +1,125 @@
+{
+  "downloaded": [
+    {
+      "ticker": "NVDA",
+      "dest": "/Users/xubaotian/pdf-intelligence/tests/benchmark/financial_10k/nvda_10k.htm",
+      "source": "/Users/xubaotian/pdf-intelligence/data/filings/nvda_2026-02-25_10-k.htm",
+      "form": "10-K",
+      "filing_date": "2026-02-25",
+      "primary_document": "nvda-20260125.htm"
+    },
+    {
+      "ticker": "TSLA",
+      "dest": "/Users/xubaotian/pdf-intelligence/tests/benchmark/financial_10k/tsla_10k.htm",
+      "source": "/Users/xubaotian/pdf-intelligence/data/filings/tsla_2026-01-29_10-k.htm",
+      "form": "10-K",
+      "filing_date": "2026-01-29",
+      "primary_document": "tsla-20251231.htm"
+    },
+    {
+      "ticker": "JPM",
+      "dest": "/Users/xubaotian/pdf-intelligence/tests/benchmark/financial_10k/jpm_10k.htm",
+      "source": "/Users/xubaotian/pdf-intelligence/data/filings/jpm_2026-02-13_10-k.htm",
+      "form": "10-K",
+      "filing_date": "2026-02-13",
+      "primary_document": "jpm-20251231.htm"
+    },
+    {
+      "ticker": "V",
+      "dest": "/Users/xubaotian/pdf-intelligence/tests/benchmark/financial_10k/v_10k.htm",
+      "source": "/Users/xubaotian/pdf-intelligence/data/filings/v_2025-11-06_10-k.htm",
+      "form": "10-K",
+      "filing_date": "2025-11-06",
+      "primary_document": "v-20250930.htm"
+    },
+    {
+      "ticker": "UNH",
+      "dest": "/Users/xubaotian/pdf-intelligence/tests/benchmark/financial_10k/unh_10k.htm",
+      "source": "/Users/xubaotian/pdf-intelligence/data/filings/unh_2026-03-02_10-k.htm",
+      "form": "10-K",
+      "filing_date": "2026-03-02",
+      "primary_document": "unh-20251231.htm"
+    },
+    {
+      "ticker": "JNJ",
+      "dest": "/Users/xubaotian/pdf-intelligence/tests/benchmark/financial_10k/jnj_10k.htm",
+      "source": "/Users/xubaotian/pdf-intelligence/data/filings/jnj_2026-02-11_10-k.htm",
+      "form": "10-K",
+      "filing_date": "2026-02-11",
+      "primary_document": "jnj-20251228.htm"
+    },
+    {
+      "ticker": "WMT",
+      "dest": "/Users/xubaotian/pdf-intelligence/tests/benchmark/financial_10k/wmt_10k.htm",
+      "source": "/Users/xubaotian/pdf-intelligence/data/filings/wmt_2026-03-13_10-k.htm",
+      "form": "10-K",
+      "filing_date": "2026-03-13",
+      "primary_document": "wmt-20260131.htm"
+    },
+    {
+      "ticker": "MA",
+      "dest": "/Users/xubaotian/pdf-intelligence/tests/benchmark/financial_10k/ma_10k.htm",
+      "source": "/Users/xubaotian/pdf-intelligence/data/filings/ma_2026-02-11_10-k.htm",
+      "form": "10-K",
+      "filing_date": "2026-02-11",
+      "primary_document": "ma-20251231.htm"
+    },
+    {
+      "ticker": "HD",
+      "dest": "/Users/xubaotian/pdf-intelligence/tests/benchmark/financial_10k/hd_10k.htm",
+      "source": "/Users/xubaotian/pdf-intelligence/data/filings/hd_2026-03-18_10-k.htm",
+      "form": "10-K",
+      "filing_date": "2026-03-18",
+      "primary_document": "hd-20260201.htm"
+    },
+    {
+      "ticker": "LLY",
+      "dest": "/Users/xubaotian/pdf-intelligence/tests/benchmark/financial_10k/lly_10k.htm",
+      "source": "/Users/xubaotian/pdf-intelligence/data/filings/lly_2026-02-12_10-k.htm",
+      "form": "10-K",
+      "filing_date": "2026-02-12",
+      "primary_document": "lly-20251231.htm"
+    },
+    {
+      "ticker": "AVGO",
+      "dest": "/Users/xubaotian/pdf-intelligence/tests/benchmark/financial_10k/avgo_10k.htm",
+      "source": "/Users/xubaotian/pdf-intelligence/data/filings/avgo_2025-12-18_10-k.htm",
+      "form": "10-K",
+      "filing_date": "2025-12-18",
+      "primary_document": "avgo-20251102.htm"
+    },
+    {
+      "ticker": "AMD",
+      "dest": "/Users/xubaotian/pdf-intelligence/tests/benchmark/financial_10k/amd_10k.htm",
+      "source": "/Users/xubaotian/pdf-intelligence/data/filings/amd_2026-02-04_10-k.htm",
+      "form": "10-K",
+      "filing_date": "2026-02-04",
+      "primary_document": "amd-20251227.htm"
+    },
+    {
+      "ticker": "CRM",
+      "dest": "/Users/xubaotian/pdf-intelligence/tests/benchmark/financial_10k/crm_10k.htm",
+      "source": "/Users/xubaotian/pdf-intelligence/data/filings/crm_2026-03-02_10-k.htm",
+      "form": "10-K",
+      "filing_date": "2026-03-02",
+      "primary_document": "crm-20260131.htm"
+    },
+    {
+      "ticker": "NFLX",
+      "dest": "/Users/xubaotian/pdf-intelligence/tests/benchmark/financial_10k/nflx_10k.htm",
+      "source": "/Users/xubaotian/pdf-intelligence/data/filings/nflx_2026-01-23_10-k.htm",
+      "form": "10-K",
+      "filing_date": "2026-01-23",
+      "primary_document": "nflx-20251231.htm"
+    },
+    {
+      "ticker": "INTC",
+      "dest": "/Users/xubaotian/pdf-intelligence/tests/benchmark/financial_10k/intc_10k.htm",
+      "source": "/Users/xubaotian/pdf-intelligence/data/filings/intc_2026-01-23_10-k.htm",
+      "form": "10-K",
+      "filing_date": "2026-01-23",
+      "primary_document": "intc-20251227.htm"
+    }
+  ],
+  "errors": []
+}

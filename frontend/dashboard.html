@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Financial Verification Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #080c10; --card: #0f151c; --surface: #141c26;
+      --border: #1e2a3a; --border-hover: #2d3f55;
+      --text: #e4e9f0; --muted: #7a8b9e; --dim: #4d5e6f;
+      --accent: #2dd4a8; --accent-bg: rgba(45,212,168,0.10); --accent-glow: rgba(45,212,168,0.25);
+      --amber: #f0a845; --amber-bg: rgba(240,168,69,0.10);
+      --red: #f07178; --red-bg: rgba(240,113,120,0.10);
+      --blue: #5b9fd4; --blue-bg: rgba(91,159,212,0.10);
+      --green: #2dd4a8; --green-bg: rgba(45,212,168,0.10);
+      --radius: 10px; --radius-sm: 6px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: "DM Sans", -apple-system, sans-serif;
+      background: var(--bg); color: var(--text);
+      min-height: 100vh; line-height: 1.6;
+    }
+
+    body::before {
+      content: ""; position: fixed; inset: 0;
+      background: radial-gradient(ellipse 70% 40% at 50% -10%, rgba(45,212,168,0.06), transparent),
+                  radial-gradient(ellipse 50% 30% at 90% 80%, rgba(45,212,168,0.04), transparent);
+      pointer-events: none; z-index: 0;
+    }
+
+    .app { position: relative; z-index: 1; max-width: 1100px; margin: 0 auto; padding: 2rem 1.25rem 4rem; }
+
+    .header { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.25rem; }
+    .logo {
+      width: 36px; height: 36px; border-radius: 8px;
+      background: linear-gradient(135deg, var(--accent), #1a9e7a);
+      display: flex; align-items: center; justify-content: center;
+      font-family: "IBM Plex Mono", monospace; font-weight: 600; font-size: 0.65rem;
+      color: var(--bg); box-shadow: 0 0 20px var(--accent-glow);
+    }
+    .header h1 { font-size: 1.2rem; font-weight: 600; letter-spacing: -0.02em; }
+    .subtitle { color: var(--muted); font-size: 0.82rem; margin-bottom: 2rem; }
+
+    .nav-row { display: flex; gap: 0.5rem; margin-bottom: 2rem; }
+    .nav-link {
+      font-size: 0.78rem; color: var(--muted); text-decoration: none;
+      padding: 0.35rem 0.7rem; border: 1px solid var(--border); border-radius: var(--radius-sm);
+      transition: all 0.15s;
+    }
+    .nav-link:hover { color: var(--text); border-color: var(--border-hover); }
+    .nav-link.active { color: var(--accent); border-color: var(--accent); background: var(--accent-bg); }
+
+    .card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 1.5rem; margin-bottom: 1.25rem;
+    }
+    .card-title {
+      font-size: 0.75rem; font-weight: 600; color: var(--muted);
+      text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 1rem;
+    }
+
+    .tip {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 16px; height: 16px; border-radius: 50%; font-size: 0.6rem;
+      background: var(--border); color: var(--muted); cursor: help;
+      margin-left: 0.35rem; flex-shrink: 0; position: relative; vertical-align: middle;
+    }
+    .tip:hover { background: var(--border-hover); color: var(--text); }
+    .tip-text {
+      display: none; position: absolute; bottom: calc(100% + 8px); left: 50%;
+      transform: translateX(-50%); white-space: nowrap;
+      background: var(--text); color: var(--bg); font-size: 0.7rem;
+      padding: 0.4rem 0.75rem; border-radius: 4px; z-index: 10;
+      font-family: "DM Sans", sans-serif; font-weight: 400; pointer-events: none;
+    }
+    .tip:hover .tip-text { display: block; }
+
+    /* Search row */
+    .search-row { display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: flex-end; }
+    .field { flex: 1; min-width: 120px; }
+    .field.narrow { flex: 0 0 100px; min-width: 90px; }
+    .field label {
+      display: flex; align-items: center;
+      font-size: 0.68rem; font-weight: 500; color: var(--muted);
+      text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.3rem;
+    }
+    .field select, .field input {
+      width: 100%; background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); color: var(--text);
+      font-family: "IBM Plex Mono", monospace; font-size: 0.85rem;
+      padding: 0.6rem 0.75rem; outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .field select:focus, .field input:focus {
+      border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-bg);
+    }
+
+    .upload-row { margin-top: 0.75rem; display: flex; align-items: center; gap: 0.75rem; }
+    .upload-label {
+      font-size: 0.78rem; color: var(--muted); cursor: pointer;
+      padding: 0.45rem 0.75rem; border: 1px dashed var(--border);
+      border-radius: var(--radius-sm); transition: border-color 0.15s;
+    }
+    .upload-label:hover { border-color: var(--border-hover); }
+    .upload-label input { display: none; }
+    .file-name { font-size: 0.75rem; color: var(--dim); font-family: "IBM Plex Mono", monospace; }
+
+    .btn {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      background: var(--accent); color: var(--bg); border: none;
+      padding: 0.6rem 1.3rem; border-radius: var(--radius-sm);
+      font-family: "DM Sans", sans-serif; font-size: 0.85rem; font-weight: 600;
+      cursor: pointer; transition: opacity 0.15s, transform 0.1s; white-space: nowrap;
+    }
+    .btn:hover { opacity: 0.88; }
+    .btn:active { transform: scale(0.98); }
+    .btn:disabled { opacity: 0.35; cursor: not-allowed; }
+    .btn.secondary { background: transparent; color: var(--text); border: 1px solid var(--border); }
+    .btn.secondary:hover { border-color: var(--border-hover); opacity: 1; }
+
+    .loading-panel {
+      display: none; text-align: center; padding: 2.5rem 1.5rem;
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--radius); margin-bottom: 1.25rem;
+    }
+    .loading-panel.visible { display: block; }
+    .loader-ring {
+      width: 40px; height: 40px; border: 3px solid var(--border);
+      border-top-color: var(--accent); border-radius: 50%;
+      animation: spin 0.9s linear infinite; margin: 0 auto 0.75rem;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-text { color: var(--muted); font-size: 0.85rem; }
+    .loading-sub { color: var(--dim); font-size: 0.75rem; margin-top: 0.25rem; }
+
+    .dashboard { display: none; }
+    .dashboard.visible { display: block; }
+
+    .company-bar {
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 0.75rem; margin-bottom: 1rem;
+    }
+    .company-bar h2 { font-size: 1.3rem; font-weight: 600; }
+    .company-meta {
+      display: flex; gap: 1rem; flex-wrap: wrap; font-size: 0.75rem;
+      color: var(--muted); font-family: "IBM Plex Mono", monospace; margin-top: 0.2rem;
+    }
+    .badge {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      font-size: 0.72rem; font-weight: 600; padding: 0.35rem 0.75rem;
+      border-radius: 100px; text-transform: uppercase; letter-spacing: 0.04em;
+    }
+    .badge.ready { background: var(--green-bg); color: var(--green); }
+    .badge.review { background: var(--amber-bg); color: var(--amber); }
+    .badge-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+    /* Metrics */
+    .metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.75rem; margin-bottom: 1rem; }
+    @media (max-width: 750px) { .metrics { grid-template-columns: repeat(2, 1fr); } }
+    .metric-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 1rem 1.1rem; display: flex; flex-direction: column;
+    }
+    .metric-card.highlight {
+      border-color: rgba(45,212,168,0.25);
+      background: linear-gradient(135deg, var(--surface) 0%, rgba(45,212,168,0.04) 100%);
+    }
+    .metric-label-row {
+      display: flex; align-items: center;
+      font-size: 0.65rem; color: var(--muted);
+      text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.4rem;
+    }
+    .metric-value {
+      font-family: "IBM Plex Mono", monospace; font-size: 1.5rem; font-weight: 600;
+    }
+    .metric-value.accent { color: var(--accent); }
+    .metric-sub { font-size: 0.7rem; color: var(--dim); margin-top: 0.2rem; }
+
+    /* Status bar */
+    .status-bar { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.85rem; }
+    .status-pill {
+      display: flex; align-items: center; gap: 0.45rem;
+      padding: 0.4rem 0.75rem; border-radius: 100px; font-size: 0.75rem;
+      font-family: "IBM Plex Mono", monospace;
+      border: 1px solid var(--border); background: var(--surface); color: var(--muted);
+      cursor: pointer; transition: all 0.15s;
+    }
+    .status-pill:hover, .status-pill.active { background: var(--surface); border-color: var(--border-hover); color: var(--text); }
+    .status-pill.matched .count { color: var(--green); }
+    .status-pill.mismatch .count { color: var(--red); }
+    .status-pill.xbrl_only .count { color: var(--amber); }
+    .status-pill.pdf_only .count { color: var(--blue); }
+
+    .tabs {
+      display: flex; gap: 0.25rem; border-bottom: 1px solid var(--border); margin-top: 0.75rem;
+    }
+    .tab {
+      padding: 0.6rem 1rem; font-size: 0.8rem; font-weight: 500;
+      color: var(--muted); background: none; border: none; cursor: pointer;
+      border-bottom: 2px solid transparent; margin-bottom: -1px;
+      transition: all 0.15s;
+    }
+    .tab:hover { color: var(--text); }
+    .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+    .table-actions { display: flex; gap: 0.5rem; align-items: center; padding: 0.6rem 0; }
+    .table-label { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+
+    .table-panel {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 0 0 var(--radius) var(--radius); overflow: hidden;
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.78rem; }
+    thead th {
+      text-align: left; padding: 0.65rem 0.85rem; font-size: 0.65rem;
+      font-weight: 600; color: var(--muted); text-transform: uppercase;
+      letter-spacing: 0.05em; background: var(--bg);
+      border-bottom: 1px solid var(--border); white-space: nowrap;
+      cursor: default; user-select: none; position: relative;
+    }
+    thead th.sortable { cursor: pointer; }
+    thead th.sortable:hover { color: var(--text); }
+    thead th .sort-arrow {
+      margin-left: 0.3rem; font-size: 0.55rem; opacity: 0.4;
+    }
+    thead th.sorted .sort-arrow { opacity: 1; color: var(--accent); }
+    th.num { text-align: right; }
+    tbody td {
+      padding: 0.6rem 0.85rem; border-bottom: 1px solid rgba(30,42,58,0.5);
+      vertical-align: middle;
+    }
+    tbody tr:hover { background: rgba(255,255,255,0.02); }
+    tbody tr:last-child td { border-bottom: none; }
+
+    .mono { font-family: "IBM Plex Mono", monospace; }
+    .field-name { font-weight: 500; }
+    .field-sub { font-size: 0.68rem; color: var(--dim); margin-top: 0.1rem; }
+    .num { text-align: right; white-space: nowrap; }
+    .num.empty { color: var(--dim); }
+    .delta-pos { color: var(--amber); }
+    .delta-neg { color: var(--red); }
+
+    .status-tag {
+      display: inline-block; font-size: 0.65rem; font-weight: 600;
+      padding: 0.18rem 0.45rem; border-radius: 4px; text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+    .status-tag.matched { background: var(--green-bg); color: var(--green); }
+    .status-tag.mismatch { background: var(--red-bg); color: var(--red); }
+    .status-tag.xbrl_only { background: var(--amber-bg); color: var(--amber); }
+    .status-tag.pdf_only { background: var(--blue-bg); color: var(--blue); }
+
+    .alert {
+      display: none; background: var(--amber-bg);
+      border: 1px solid rgba(240,168,69,0.2); color: var(--amber);
+      border-radius: var(--radius-sm); padding: 0.65rem 0.9rem;
+      font-size: 0.78rem; margin-bottom: 1rem;
+    }
+    .alert.visible { display: block; }
+    .alert.error { background: var(--red-bg); border-color: rgba(240,113,120,0.2); color: var(--red); }
+
+    .empty-state {
+      text-align: center; padding: 2.5rem 1rem; color: var(--dim); font-size: 0.85rem;
+    }
+
+    .source-footer {
+      margin-top: 0.75rem; padding: 0.65rem 0.85rem;
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); font-size: 0.7rem; color: var(--dim);
+      font-family: "IBM Plex Mono", monospace; word-break: break-all;
+    }
+
+    .batch-toggle { display: flex; gap: 0.4rem; margin-bottom: 0.75rem; }
+    .mode-btn {
+      padding: 0.35rem 0.8rem; border-radius: var(--radius-sm);
+      border: 1px solid var(--border); background: var(--surface); color: var(--muted);
+      font-size: 0.75rem; cursor: pointer; transition: all 0.15s;
+    }
+    .mode-btn:hover { border-color: var(--border-hover); }
+    .mode-btn.active { border-color: var(--accent); color: var(--accent); background: var(--accent-bg); }
+
+    .batch-area { display: none; margin-top: 0.75rem; }
+    .batch-area.visible { display: block; }
+    .batch-area textarea {
+      width: 100%; min-height: 80px; background: var(--surface);
+      border: 1px solid var(--border); border-radius: var(--radius-sm);
+      color: var(--text); font-family: "IBM Plex Mono", monospace;
+      font-size: 0.78rem; padding: 0.65rem; resize: vertical;
+    }
+
+    .batch-panel { display: none; }
+    .batch-panel.visible { display: block; margin-bottom: 1.25rem; }
+    .row-ok { color: var(--green); }
+    .row-bad { color: var(--red); }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="header">
+      <div class="logo">VFI</div>
+      <h1>Verified Financial Intelligence</h1>
+    </header>
+    <p class="subtitle">
+      Cross-verify financial statements: SEC XBRL vs. extracted PDF data.
+      Supports US (EDGAR), HK (HKEx), and EU (ESEF) filings with automated reconciliation.
+    </p>
+
+    <div class="nav-row">
+      <a class="nav-link" href="index.html">Table Extraction</a>
+      <a class="nav-link active" href="dashboard.html">Financial Verification</a>
+    </div>
+
+    <!-- Search Panel -->
+    <div class="card">
+      <div class="card-title">1 — Select Company</div>
+
+      <div class="batch-toggle">
+        <span class="tip" style="margin-right:0.5rem;">?<span class="tip-text">Single: verify one company. Batch: verify multiple companies at once by entering one ticker per line.</span></span>
+        <button class="mode-btn active" id="modeSingle">Single Company</button>
+        <button class="mode-btn" id="modeBatch">Batch (Multi-Company)</button>
+      </div>
+
+      <div class="search-row">
+        <div class="field narrow">
+          <label>Market <span class="tip">?<span class="tip-text">US stocks pull from SEC EDGAR (XBRL). HK stocks pull from HKEx filings. EU uses ESEF inline XBRL from ESMA.</span></span></label>
+          <select id="marketSelect">
+            <option value="US" selected>US (SEC)</option>
+            <option value="HK">HK (HKEx)</option>
+            <option value="EU">EU (ESEF)</option>
+          </select>
+        </div>
+        <div class="field" id="singleTickerField">
+          <label id="tickerLabel">Ticker Symbol <span class="tip">?<span class="tip-text" id="tickerTipText">Stock symbol, e.g. AAPL for Apple, MSFT for Microsoft, 0700 for Tencent.</span></span></label>
+          <input type="text" id="tickerInput" placeholder="Enter a stock ticker…" value="" autocomplete="off" />
+        </div>
+        <div class="field narrow" id="fiscalYearField" style="display:none;">
+          <label>Fiscal Year <span class="tip">?<span class="tip-text">ESEF annual report fiscal year. Most recent available year is pre-selected.</span></span></label>
+          <select id="fiscalYearSelect">
+            <option value="2025">2025</option>
+            <option value="2024" selected>2024</option>
+            <option value="2023">2023</option>
+            <option value="2022">2022</option>
+            <option value="2021">2021</option>
+            <option value="2020">2020</option>
+          </select>
+        </div>
+        <div class="field narrow">
+          <label>Fiscal Years <span class="tip">?<span class="tip-text">How many years of financials to compare. More years = more thorough but slower.</span></span></label>
+          <select id="periodsSelect">
+            <option value="2">2 years</option>
+            <option value="3" selected>3 years</option>
+            <option value="4">4 years</option>
+            <option value="5">5 years</option>
+          </select>
+        </div>
+        <div class="field" style="flex:0 0 160px;min-width:140px;">
+          <label>API Key (opt) <span class="tip">?<span class="tip-text">Enter your API key for rate-limited private access. Leave empty for public mode.</span></span></label>
+          <input type="password" id="apiKeyInput" placeholder="X-API-Key" autocomplete="off" />
+        </div>
+        <button class="btn" id="verifyBtn" style="align-self:flex-end;">Verify</button>
+        <button class="btn secondary" id="downloadBtn" style="align-self:flex-end;" disabled>Download Excel</button>
+      </div>
+
+      <div class="batch-area" id="batchArea">
+        <label style="font-size:0.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;">
+          Batch List (one per line: MARKET:TICKER or EU:LEI:YEAR)
+        </label>
+        <span class="tip">?<span class="tip-text">Format: US:AAPL, HK:0700, or EU:LEI:2024 (e.g. EU:724500Y6DUVHQD6OXN27:2025). One company per line. All use the same fiscal years setting above.</span></span>
+        <textarea id="batchInput" placeholder="US:AAPL
+US:MSFT
+HK:0700
+EU:724500Y6DUVHQD6OXN27:2025"></textarea>
+      </div>
+
+      <div class="upload-row" id="uploadRow">
+        <label class="upload-label">
+          <input type="file" id="fileInput" accept=".pdf,.htm,.html,.xhtml" />
+          Upload Annual Report (optional)
+        </label>
+        <span class="tip">?<span class="tip-text">Upload a custom PDF if the auto-downloaded SEC filing isn't sufficient, or for HK stocks where filings aren't auto-fetched.</span></span>
+        <span class="file-name" id="fileName">No file selected — auto-download from SEC</span>
+      </div>
+    </div>
+
+    <div class="alert" id="alertBox"></div>
+
+    <div class="loading-panel" id="loadingPanel">
+      <div class="loader-ring"></div>
+      <div class="loading-text" id="loadingText">Fetching SEC XBRL and reconciling with PDF...</div>
+      <div class="loading-sub">Usually takes 5–15 seconds per company</div>
+    </div>
+
+    <!-- Batch Results -->
+    <div class="batch-panel" id="batchPanel">
+      <div class="card">
+        <div class="card-title">Batch Summary</div>
+        <div class="metrics" style="grid-template-columns:repeat(4,1fr);">
+          <div class="metric-card highlight">
+            <div class="metric-label-row">Successful <span class="tip">?<span class="tip-text">How many of the requested companies returned valid results.</span></span></div>
+            <div class="metric-value accent" id="batchSuccess">—</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label-row">Production-Ready <span class="tip">?<span class="tip-text">Companies whose trust score is above the automatic-approval threshold.</span></span></div>
+            <div class="metric-value" id="batchReady">—</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label-row">Avg Trust Score <span class="tip">?<span class="tip-text">Average trust score across all successful companies in the batch.</span></span></div>
+            <div class="metric-value" id="batchTrust">—</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label-row">Total Companies</div>
+            <div class="metric-value" id="batchTotal">—</div>
+          </div>
+        </div>
+        <div class="table-panel" style="margin-top:0.75rem;">
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Market</th><th>Ticker</th><th>Company</th><th>Status</th>
+                  <th>Trust Score</th><th>Pass Rate</th><th>Matched</th><th>Mismatched</th>
+                </tr>
+              </thead>
+              <tbody id="batchBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Single-Company Dashboard -->
+    <div class="dashboard" id="dashboard">
+      <div class="card" style="padding-bottom:1rem;">
+        <div class="company-bar">
+          <div>
+            <h2 id="companyName">—</h2>
+            <div class="company-meta">
+              <span id="metaTicker">—</span>
+              <span id="metaCik">—</span>
+              <span id="metaMarket">—</span>
+              <span id="metaDocType">—</span>
+            </div>
+          </div>
+          <div id="productionBadge"></div>
+        </div>
+
+        <!-- Metrics -->
+        <div class="metrics">
+          <div class="metric-card highlight">
+            <div class="metric-label-row">Trust Score <span class="tip">?<span class="tip-text">Overall confidence: weighted ratio of matched items considering magnitude and severity of mismatches. 85%+ means production-ready.</span></span></div>
+            <div class="metric-value accent" id="trustScore">—</div>
+            <div class="metric-sub">Weighted verification score</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label-row">Verification Rate <span class="tip">?<span class="tip-text">Percentage of comparable fields where XBRL and PDF data agree within tolerance.</span></span></div>
+            <div class="metric-value" id="verifyRate">—</div>
+            <div class="metric-sub">XBRL vs PDF agreement</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label-row">Matched <span class="tip">?<span class="tip-text">Fields where both sources agree (within 1% or $1M tolerance).</span></span></div>
+            <div class="metric-value" id="matchedCount" style="color:var(--green)">—</div>
+            <div class="metric-sub">Both sources agree</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label-row">Mismatched <span class="tip">?<span class="tip-text">Fields where XBRL and PDF differ — these need manual review.</span></span></div>
+            <div class="metric-value" id="mismatchCount" style="color:var(--red)">—</div>
+            <div class="metric-sub">Needs human review</div>
+          </div>
+        </div>
+
+        <div class="card-title" style="margin-bottom:0.5rem;">Status Breakdown</div>
+        <div class="status-bar" id="statusBar"></div>
+
+        <div class="tabs" id="statementTabs">
+          <button class="tab active" data-stmt="all">All Statements</button>
+          <button class="tab" data-stmt="income">Income Statement</button>
+          <button class="tab" data-stmt="balance">Balance Sheet</button>
+          <button class="tab" data-stmt="cashflow">Cash Flow</button>
+        </div>
+
+        <div class="table-actions">
+          <span class="table-label">Click column headers to sort</span>
+          <button class="btn secondary" id="csvBtn" style="font-size:0.75rem;padding:0.35rem 0.7rem;display:none;">Download CSV</button>
+        </div>
+
+        <div class="table-panel">
+          <div class="table-wrap">
+            <table id="reconTable">
+              <thead>
+                <tr>
+                  <th class="sortable" data-key="field_name">Line Item <span class="sort-arrow">⇅</span></th>
+                  <th class="sortable" data-key="period">Period <span class="sort-arrow">⇅</span></th>
+                  <th class="sortable" data-key="status">Status <span class="sort-arrow">⇅</span></th>
+                  <th class="num sortable" data-key="xbrl">XBRL (SEC) <span class="sort-arrow">⇅</span></th>
+                  <th class="num sortable" data-key="pdf">PDF <span class="sort-arrow">⇅</span></th>
+                  <th class="num sortable" data-key="delta">Delta <span class="sort-arrow">⇅</span></th>
+                </tr>
+              </thead>
+              <tbody id="tableBody"></tbody>
+            </table>
+          </div>
+          <div class="empty-state" id="emptyState" style="display:none;">No data matching the current filters.</div>
+        </div>
+
+        <div class="source-footer" id="sourceFooter"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API = window.location.port === "8000" ? "" : "http://localhost:8000";
+
+    const FIELD_STMT = {
+      revenue: "income", gross_profit: "income", operating_income: "income",
+      net_income: "income", eps_basic: "income",
+      total_assets: "balance", total_liabilities: "balance",
+      total_equity: "balance", cash: "balance",
+      cfo: "cashflow", cfi: "cashflow", cff: "cashflow", capex: "cashflow",
+    };
+
+    const STATUS_LABELS = {
+      matched: "Matched", mismatch: "Mismatch",
+      xbrl_only: "XBRL Only", pdf_only: "PDF Only", both_missing: "Missing",
+    };
+
+    let currentData = null;
+    let batchData = null;
+    let activeFilter = "all";
+    let activeStatus = null;
+    let uploadedFile = null;
+    let lastTicker = "";
+    let lastMarket = "US";
+    let verifyMode = "single";
+    let sortKey = null;
+    let sortAsc = true;
+
+    const $ = id => document.getElementById(id);
+
+    const savedKey = localStorage.getItem("vfi_api_key");
+    if (savedKey) $("apiKeyInput").value = savedKey;
+
+    function apiHeaders(json = false) {
+      const h = {};
+      if (json) h["Content-Type"] = "application/json";
+      const key = $("apiKeyInput").value.trim();
+      if (key) h["X-API-Key"] = key;
+      return h;
+    }
+
+    function setMode(mode) {
+      verifyMode = mode;
+      $("modeSingle").classList.toggle("active", mode === "single");
+      $("modeBatch").classList.toggle("active", mode === "batch");
+      $("batchArea").classList.toggle("visible", mode === "batch");
+      $("singleTickerField").style.display = mode === "single" ? "" : "none";
+      $("fiscalYearField").style.display = mode === "single" && $("marketSelect").value === "EU" ? "" : "none";
+      $("uploadRow").style.display = mode === "single" ? "" : "none";
+      $("downloadBtn").textContent = mode === "batch" ? "Download Portfolio Excel" : "Download Excel";
+      $("downloadBtn").disabled = mode === "batch" ? !batchData : !currentData;
+      $("dashboard").classList.toggle("visible", mode === "single" && !!currentData);
+      $("batchPanel").classList.toggle("visible", mode === "batch" && !!batchData);
+    }
+
+    $("modeSingle").addEventListener("click", () => setMode("single"));
+    $("modeBatch").addEventListener("click", () => setMode("batch"));
+
+    $("marketSelect").addEventListener("change", () => {
+      const market = $("marketSelect").value;
+      const isEU = market === "EU";
+      $("fiscalYearField").style.display = isEU ? "" : "none";
+      const tickerLabel = $("tickerLabel");
+      const tickerTip = $("tickerTipText");
+      const tickerInput = $("tickerInput");
+      if (isEU) {
+        tickerLabel.innerHTML = 'LEI Code <span class="tip">?<span class="tip-text" id="tickerTipText">Legal Entity Identifier, e.g. 724500Y6DUVHQD6OXN27 for ASML. Find at gleif.org.</span></span>';
+        tickerInput.placeholder = "Enter LEI identifier…";
+        $("periodsSelect").value = "2";
+      } else if (market === "HK") {
+        tickerLabel.innerHTML = 'Ticker Symbol <span class="tip">?<span class="tip-text" id="tickerTipText">Stock symbol, e.g. 0700 for Tencent, 0388 for HKEx.</span></span>';
+        tickerInput.placeholder = "Enter a stock ticker…";
+      } else {
+        tickerLabel.innerHTML = 'Ticker Symbol <span class="tip">?<span class="tip-text" id="tickerTipText">Stock symbol, e.g. AAPL for Apple, MSFT for Microsoft.</span></span>';
+        tickerInput.placeholder = "Enter a stock ticker…";
+      }
+      $("fileName").textContent = isEU
+        ? "EU stocks require ESEF XHTML upload (or auto-download from ESMA)"
+        : market === "HK"
+        ? "HK stocks require local annual report PDF upload"
+        : "No file selected — auto-download from SEC";
+    });
+
+    $("apiKeyInput").addEventListener("change", () => {
+      localStorage.setItem("vfi_api_key", $("apiKeyInput").value.trim());
+    });
+
+
+    $("fileInput").addEventListener("change", () => {
+      uploadedFile = $("fileInput").files[0] || null;
+      const market = $("marketSelect").value;
+      $("fileName").textContent = uploadedFile
+        ? uploadedFile.name
+        : market === "EU"
+        ? "EU stocks require ESEF XHTML upload (or auto-download from ESMA)"
+        : market === "HK"
+        ? "HK stocks require local annual report PDF upload"
+        : "No file selected — auto-download from SEC";
+    });
+
+    $("statementTabs").addEventListener("click", e => {
+      const tab = e.target.closest(".tab");
+      if (!tab) return;
+      document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+      tab.classList.add("active");
+      activeFilter = tab.dataset.stmt;
+      sortKey = null; sortAsc = true; updateSortHeaders();
+      renderTable();
+    });
+
+    // #5: Sortable columns
+    $("reconTable").addEventListener("click", e => {
+      const th = e.target.closest("th.sortable");
+      if (!th) return;
+      const key = th.dataset.key;
+      if (sortKey === key) {
+        sortAsc = !sortAsc;
+      } else {
+        sortKey = key;
+        sortAsc = true;
+      }
+      updateSortHeaders();
+      renderTable();
+    });
+
+    function updateSortHeaders() {
+      document.querySelectorAll("th.sortable").forEach(th => {
+        th.classList.remove("sorted");
+        const arrow = th.querySelector(".sort-arrow");
+        if (arrow) arrow.textContent = "⇅";
+      });
+      if (sortKey) {
+        const active = document.querySelector(`th.sortable[data-key="${sortKey}"]`);
+        if (active) {
+          active.classList.add("sorted");
+          const arrow = active.querySelector(".sort-arrow");
+          if (arrow) arrow.textContent = sortAsc ? "▲" : "▼";
+        }
+      }
+    }
+
+    $("verifyBtn").addEventListener("click", runVerify);
+    $("downloadBtn").addEventListener("click", downloadExcel);
+    $("tickerInput").addEventListener("keydown", e => { if (e.key === "Enter") runVerify(); });
+
+    function showAlert(msg, isError = false) {
+      const box = $("alertBox");
+      box.textContent = msg;
+      box.className = "alert visible" + (isError ? " error" : "");
+    }
+    function hideAlert() { $("alertBox").className = "alert"; }
+
+    function fmtNum(val, fieldId) {
+      if (val == null) return "—";
+      if (fieldId === "eps_basic") return val.toFixed(2);
+      if (Math.abs(val) >= 1000) return val.toLocaleString("en-US", { maximumFractionDigits: 0 });
+      return val.toLocaleString("en-US", { maximumFractionDigits: 2 });
+    }
+
+    function fmtPct(val) { return (val * 100).toFixed(1) + "%"; }
+
+    async function runVerify() {
+      localStorage.setItem("vfi_api_key", $("apiKeyInput").value.trim());
+      if (verifyMode === "batch") return runBatchVerify();
+
+      const ticker = $("tickerInput").value.trim().toUpperCase();
+      const market = $("marketSelect").value;
+      if (!ticker) { showAlert("Please enter a ticker symbol or LEI code.", true); return; }
+
+      lastTicker = ticker; lastMarket = market;
+      const periods = $("periodsSelect").value;
+      const fiscalYear = $("fiscalYearSelect")?.value || "2024";
+      const marketLower = market.toLowerCase();
+      hideAlert();
+      $("loadingPanel").classList.add("visible");
+      if (market === "EU") {
+        $("loadingText").textContent = "Fetching ESEF inline XBRL and reconciling statements...";
+      } else if (market === "HK") {
+        $("loadingText").textContent = "Parsing HK annual report and cross-referencing with ADR...";
+      } else {
+        $("loadingText").textContent = "Fetching SEC XBRL and reconciling with PDF...";
+      }
+      $("dashboard").classList.remove("visible");
+      $("verifyBtn").disabled = true;
+      $("downloadBtn").disabled = true;
+
+      try {
+        let data;
+        let base;
+        if (market === "EU") {
+          base = `${API}/api/v1/markets/eu/${ticker}/verify?fiscal_year=${fiscalYear}&periods=${periods}&export_excel=true&export_formula_excel=true`;
+        } else {
+          base = `${API}/api/v1/markets/${marketLower}/${ticker}/verify?periods=${periods}&export_excel=true`;
+        }
+        if (uploadedFile) {
+          const form = new FormData();
+          form.append("file", uploadedFile);
+          const res = await fetch(base, { method: "POST", headers: apiHeaders(), body: form });
+          if (!res.ok) { const err = await res.json().catch(() => ({})); throw new Error(err.detail || `Request failed (${res.status})`); }
+          data = await res.json();
+        } else {
+          const res = await fetch(base, { headers: apiHeaders() });
+          if (!res.ok) { const err = await res.json().catch(() => ({})); throw new Error(err.detail || `Request failed (${res.status})`); }
+          data = await res.json();
+        }
+        currentData = data;
+
+        // #8: Persist result
+        try { localStorage.setItem("vfi_last_result", JSON.stringify(data)); } catch {}
+
+        renderDashboard(data);
+        $("downloadBtn").disabled = false;
+      } catch (err) {
+        showAlert(err.message, true);
+      } finally {
+        $("loadingPanel").classList.remove("visible");
+        $("verifyBtn").disabled = false;
+      }
+    }
+
+    async function runBatchVerify() {
+      const lines = $("batchInput").value.split("\n").map(l => l.trim()).filter(Boolean);
+      const jobs = [];
+      for (const line of lines) {
+        const parts = line.split(":").map(s => s.trim().toUpperCase());
+        if (parts.length < 2 || !parts[0] || !parts[1]) continue;
+        const market = parts[0];
+        const ticker = parts[1];
+        const fiscalYear = parts.length >= 3 ? parts[2] : undefined;
+        jobs.push({ market, ticker, fiscalYear });
+      }
+      if (!jobs.length) { showAlert("Batch format: US:AAPL, HK:0700, or EU:LEI:YEAR (one per line)", true); return; }
+
+      const periods = parseInt($("periodsSelect").value, 10);
+      hideAlert();
+      $("loadingPanel").classList.add("visible");
+      $("loadingText").textContent = `Verifying ${jobs.length} companies...`;
+      $("batchPanel").classList.remove("visible");
+      $("dashboard").classList.remove("visible");
+      $("verifyBtn").disabled = true;
+      $("downloadBtn").disabled = true;
+
+      try {
+        let res;
+        // Check if any jobs are EU (different endpoint needed)
+        const hasEU = jobs.some(j => j.market === "EU");
+        if (hasEU && jobs.length === 1) {
+          // Single EU job — use direct verify endpoint
+          const j = jobs[0];
+          const fy = j.fiscalYear || "2024";
+          const base = `${API}/api/v1/markets/eu/${j.ticker}/verify?fiscal_year=${fy}&periods=${periods}&export_excel=true&export_formula_excel=true`;
+          const fetchRes = await fetch(base, { headers: apiHeaders() });
+          if (!fetchRes.ok) { const err = await fetchRes.json().catch(() => ({})); throw new Error(err.detail || `Request failed (${fetchRes.status})`); }
+          const data = await fetchRes.json();
+          currentData = data;
+          renderDashboard(data);
+          $("downloadBtn").disabled = false;
+          $("loadingPanel").classList.remove("visible");
+          $("verifyBtn").disabled = false;
+          return;
+        }
+
+        res = await fetch(`${API}/api/v1/batch/verify`, {
+          method: "POST", headers: apiHeaders(true),
+          body: JSON.stringify({ jobs: jobs.map(j => ({ market: j.market, ticker: j.fiscalYear ? `${j.ticker}:${j.fiscalYear}` : j.ticker })), periods, export_excel: true }),
+        });
+        if (!res.ok) { const err = await res.json().catch(() => ({})); throw new Error(err.detail || `Request failed (${res.status})`); }
+        batchData = await res.json();
+        renderBatch(batchData);
+        $("downloadBtn").disabled = !batchData.portfolio_excel_path;
+      } catch (err) {
+        showAlert(err.message, true);
+      } finally {
+        $("loadingPanel").classList.remove("visible");
+        $("verifyBtn").disabled = false;
+      }
+    }
+
+    function downloadExcel() {
+      if (verifyMode === "batch" && batchData?.portfolio_excel_path) {
+        window.open(`${API}/api/v1/batch/portfolio/download?path=${encodeURIComponent(batchData.portfolio_excel_path)}`);
+        return;
+      }
+      const periods = $("periodsSelect").value;
+      const marketLower = lastMarket.toLowerCase();
+      if (lastMarket === "EU") {
+        const fiscalYear = $("fiscalYearSelect")?.value || "2024";
+        window.open(`${API}/api/v1/markets/eu/${lastTicker}/verify/download?fiscal_year=${fiscalYear}&periods=${periods}&file_type=verified`);
+      } else {
+        window.open(`${API}/api/v1/markets/${marketLower}/${lastTicker}/verify/download?periods=${periods}`);
+      }
+    }
+
+    // #9: CSV export
+    $("csvBtn").addEventListener("click", exportCSV);
+
+    function exportCSV() {
+      if (!currentData) return;
+      let rows = currentData.reconciliation.filter(item => {
+        if (activeFilter !== "all" && FIELD_STMT[item.field_id] !== activeFilter) return false;
+        if (activeStatus && item.status !== activeStatus) return false;
+        return true;
+      });
+      if (sortKey) rows = sortRows(rows);
+
+      const header = ["Line Item", "Field ID", "Period", "Status", "XBRL", "PDF", "Delta"];
+      const csvRows = [header.join(",")];
+      for (const item of rows) {
+        csvRows.push([
+          csvEscape(item.label_en),
+          csvEscape(item.field_id),
+          csvEscape(item.period_end),
+          csvEscape(STATUS_LABELS[item.status] || item.status),
+          item.xbrl_value != null ? item.xbrl_value : "",
+          item.pdf_value != null ? item.pdf_value : "",
+          item.delta != null ? item.delta : "",
+        ].join(","));
+      }
+
+      const blob = new Blob([csvRows.join("\n")], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${lastTicker}_reconciliation.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function csvEscape(str) {
+      if (!str) return "";
+      const s = String(str).replace(/"/g, '""');
+      return /[",\n]/.test(s) ? `"${s}"` : s;
+    }
+
+    function renderBatch(data) {
+      $("batchPanel").classList.add("visible");
+      $("batchSuccess").textContent = `${data.success_count}/${data.total}`;
+      $("batchReady").textContent = data.production_ready_count;
+      $("batchTrust").textContent = fmtPct(data.avg_trust_score || 0);
+      $("batchTotal").textContent = data.total;
+
+      const tbody = $("batchBody");
+      tbody.innerHTML = "";
+      for (const item of data.items) {
+        const tr = document.createElement("tr");
+        const ok = item.success;
+        tr.innerHTML = `
+          <td>${item.market}</td>
+          <td class="mono">${item.ticker}</td>
+          <td>${ok ? (item.company_name || "—") : "—"}</td>
+          <td class="${ok ? "row-ok" : "row-bad"}">${ok ? (item.production_ready ? "Production Ready" : "Review Needed") : (item.error || item.errors?.[0] || "Failed")}</td>
+          <td class="mono">${ok ? fmtPct(item.trust_score) : "—"}</td>
+          <td class="mono">${ok ? fmtPct(item.verification_rate) : "—"}</td>
+          <td class="mono">${ok ? item.matched_count : "—"}</td>
+          <td class="mono">${ok ? item.mismatch_count : "—"}</td>
+        `;
+        tbody.appendChild(tr);
+      }
+    }
+
+    function renderDashboard(data) {
+      $("dashboard").classList.add("visible");
+      $("companyName").textContent = data.company_name;
+      $("metaTicker").textContent = data.ticker;
+      $("metaCik").textContent = data.market === "EU" ? "LEI " + (data.cik || data.ticker) : (data.cik ? "CIK " + data.cik : (data.cross_list_ticker ? "ADR " + data.cross_list_ticker : "—"));
+      $("metaMarket").textContent = data.market + (data.market === "EU" ? " · ESEF/IFRS" : data.market === "HK" ? " · IFRS" : " · US-GAAP");
+      $("metaDocType").textContent = data.pdf_source_type ? "Doc: " + data.pdf_source_type.toUpperCase() : "";
+
+      $("productionBadge").innerHTML = data.production_ready
+        ? '<span class="badge ready"><span class="badge-dot"></span>Production Ready</span>'
+        : '<span class="badge review"><span class="badge-dot"></span>Review Needed</span>';
+
+      $("trustScore").textContent = fmtPct(data.trust_score);
+      $("verifyRate").textContent = fmtPct(data.verification_rate);
+      $("matchedCount").textContent = data.matched_count;
+      $("mismatchCount").textContent = data.mismatch_count;
+
+      renderStatusBar(data);
+      sortKey = null; sortAsc = true; updateSortHeaders();
+      renderTable();
+
+      $("sourceFooter").textContent = data.pdf_source ? "PDF Source: " + data.pdf_source : "";
+      $("csvBtn").style.display = data.reconciliation?.length ? "inline-flex" : "none";
+
+      if (data.errors?.length) {
+        showAlert("Note: " + data.errors.slice(0, 3).join("; "));
+      }
+    }
+
+    function renderStatusBar(data) {
+      const counts = {};
+      for (const item of data.reconciliation) {
+        counts[item.status] = (counts[item.status] || 0) + 1;
+      }
+
+      const order = ["matched", "mismatch", "xbrl_only", "pdf_only", "both_missing"];
+      const bar = $("statusBar");
+      bar.innerHTML = "";
+
+      const allPill = document.createElement("div");
+      allPill.className = "status-pill" + (activeStatus === null ? " active" : "");
+      allPill.innerHTML = `<span>All</span><span class="count">${data.reconciliation.length}</span>`;
+      allPill.onclick = () => { activeStatus = null; renderStatusBar(data); renderTable(); };
+      bar.appendChild(allPill);
+
+      for (const status of order) {
+        if (!counts[status]) continue;
+        const pill = document.createElement("div");
+        pill.className = `status-pill ${status}` + (activeStatus === status ? " active" : "");
+        pill.innerHTML = `<span>${STATUS_LABELS[status]}</span><span class="count">${counts[status]}</span>`;
+        pill.onclick = () => { activeStatus = activeStatus === status ? null : status; renderStatusBar(data); renderTable(); };
+        bar.appendChild(pill);
+      }
+    }
+
+    function sortRows(rows) {
+      if (!sortKey) return rows;
+      return [...rows].sort((a, b) => {
+        let va, vb;
+        switch (sortKey) {
+          case "field_name": va = a.label_en; vb = b.label_en; break;
+          case "period": va = a.period_end; vb = b.period_end; break;
+          case "status": va = a.status; vb = b.status; break;
+          case "xbrl": va = a.xbrl_value ?? -Infinity; vb = b.xbrl_value ?? -Infinity; break;
+          case "pdf": va = a.pdf_value ?? -Infinity; vb = b.pdf_value ?? -Infinity; break;
+          case "delta": va = a.delta ?? -Infinity; vb = b.delta ?? -Infinity; break;
+          default: return 0;
+        }
+        if (va == null || va === -Infinity) va = "";
+        if (vb == null || vb === -Infinity) vb = "";
+        if (va < vb) return sortAsc ? -1 : 1;
+        if (va > vb) return sortAsc ? 1 : -1;
+        return 0;
+      });
+    }
+
+    function renderTable() {
+      if (!currentData) return;
+      const tbody = $("tableBody");
+      tbody.innerHTML = "";
+
+      let rows = currentData.reconciliation.filter(item => {
+        if (activeFilter !== "all" && FIELD_STMT[item.field_id] !== activeFilter) return false;
+        if (activeStatus && item.status !== activeStatus) return false;
+        return true;
+      });
+
+      rows = sortRows(rows);
+
+      if (!rows.length) {
+        $("emptyState").style.display = "block";
+        return;
+      }
+      $("emptyState").style.display = "none";
+
+      for (const item of rows) {
+        const tr = document.createElement("tr");
+        const deltaClass = item.delta > 0 ? "delta-pos" : item.delta < 0 ? "delta-neg" : "";
+        tr.innerHTML = `
+          <td>
+            <div class="field-name">${item.label_en || item.field_id}</div>
+            <div class="field-sub">${item.field_id}</div>
+          </td>
+          <td class="mono">${item.period_end}</td>
+          <td><span class="status-tag ${item.status}">${STATUS_LABELS[item.status] || item.status}</span></td>
+          <td class="num mono ${item.xbrl_value == null ? "empty" : ""}">${fmtNum(item.xbrl_value, item.field_id)}</td>
+          <td class="num mono ${item.pdf_value == null ? "empty" : ""}">${fmtNum(item.pdf_value, item.field_id)}</td>
+          <td class="num mono ${deltaClass}">${item.delta != null ? (item.delta > 0 ? "+" : "") + fmtNum(item.delta, item.field_id) : "—"}</td>
+        `;
+        tbody.appendChild(tr);
+      }
+    }
+
+    // #8: Restore last result on page load
+    try {
+      const cached = JSON.parse(localStorage.getItem("vfi_last_result"));
+      if (cached && cached.ticker) {
+        currentData = cached;
+        lastTicker = cached.ticker;
+        lastMarket = cached.market;
+        $("tickerInput").value = cached.ticker;
+        if (cached.market) $("marketSelect").value = cached.market;
+        $("marketSelect").dispatchEvent(new Event("change"));
+        renderDashboard(cached);
+      }
+    } catch {}
+
+    $("marketSelect").dispatchEvent(new Event("change"));
+  </script>
+</body>
+</html>

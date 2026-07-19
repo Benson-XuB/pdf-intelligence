@@ -1,0 +1,1360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PDF Intelligence — Table Extraction</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #080c10; --card: #0f151c; --surface: #141c26;
+      --border: #1e2a3a; --border-hover: #2d3f55;
+      --text: #e4e9f0; --muted: #7a8b9e; --dim: #4d5e6f;
+      --accent: #2dd4a8; --accent-bg: rgba(45,212,168,0.10); --accent-glow: rgba(45,212,168,0.25);
+      --warn: #f0a845; --warn-bg: rgba(240,168,69,0.10);
+      --red: #f07178; --green: #2dd4a8;
+      --radius: 10px; --radius-sm: 6px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: "DM Sans", -apple-system, sans-serif;
+      background: var(--bg); color: var(--text);
+      min-height: 100vh; line-height: 1.6;
+    }
+
+    body::before {
+      content: ""; position: fixed; inset: 0;
+      background: radial-gradient(ellipse 70% 40% at 50% -10%, rgba(45,212,168,0.06), transparent),
+                  radial-gradient(ellipse 50% 30% at 90% 80%, rgba(45,212,168,0.04), transparent);
+      pointer-events: none; z-index: 0;
+    }
+
+    .app { position: relative; z-index: 1; max-width: 780px; margin: 0 auto; padding: 2.5rem 1.25rem 4rem; }
+
+    .header { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.25rem; }
+    .logo {
+      width: 36px; height: 36px; border-radius: 8px;
+      background: linear-gradient(135deg, var(--accent), #1a9e7a);
+      display: flex; align-items: center; justify-content: center;
+      font-family: "IBM Plex Mono", monospace; font-weight: 600; font-size: 0.65rem;
+      color: var(--bg); box-shadow: 0 0 20px var(--accent-glow);
+    }
+    .header h1 { font-size: 1.2rem; font-weight: 600; letter-spacing: -0.02em; }
+    .subtitle { color: var(--muted); font-size: 0.82rem; margin-bottom: 2rem; }
+
+    .nav-row { display: flex; gap: 0.5rem; margin-bottom: 2rem; }
+    .nav-link {
+      font-size: 0.78rem; color: var(--muted); text-decoration: none;
+      padding: 0.35rem 0.7rem; border: 1px solid var(--border); border-radius: var(--radius-sm);
+      transition: all 0.15s;
+    }
+    .nav-link:hover { color: var(--text); border-color: var(--border-hover); }
+    .nav-link.active { color: var(--accent); border-color: var(--accent); background: var(--accent-bg); }
+
+    .card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 1.5rem; margin-bottom: 1.25rem;
+    }
+    .card-title {
+      font-size: 0.75rem; font-weight: 600; color: var(--muted);
+      text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 1rem;
+    }
+
+    .drop-zone {
+      border: 2px dashed var(--border); border-radius: var(--radius);
+      padding: 2.5rem 1.5rem; text-align: center; cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .drop-zone:hover, .drop-zone.dragover { border-color: var(--accent); background: var(--accent-bg); }
+    .drop-zone input[type="file"] { display: none; }
+    .drop-zone .icon { font-size: 2rem; margin-bottom: 0.75rem; opacity: 0.6; }
+    .drop-zone .dz-title { font-size: 0.95rem; font-weight: 500; margin-bottom: 0.3rem; }
+    .drop-zone .dz-hint { font-size: 0.78rem; color: var(--muted); }
+
+    .file-pill {
+      display: none; align-items: center; gap: 0.6rem;
+      margin-top: 0.75rem; padding: 0.5rem 0.85rem;
+      background: var(--accent-bg); border: 1px solid rgba(45,212,168,0.2);
+      border-radius: var(--radius-sm); font-size: 0.82rem; font-family: "IBM Plex Mono", monospace;
+    }
+    .file-pill.visible { display: flex; }
+    .file-pill .name { color: var(--accent); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .file-pill .size { color: var(--muted); font-size: 0.75rem; }
+
+    .btn {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      background: var(--accent); color: var(--bg); border: none;
+      padding: 0.7rem 1.5rem; border-radius: var(--radius-sm);
+      font-family: "DM Sans", sans-serif; font-size: 0.9rem; font-weight: 600;
+      cursor: pointer; transition: opacity 0.15s, transform 0.1s; white-space: nowrap;
+    }
+    .btn:hover { opacity: 0.88; }
+    .btn:active { transform: scale(0.98); }
+    .btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
+    .btn.secondary { background: transparent; color: var(--text); border: 1px solid var(--border); }
+    .btn.secondary:hover { border-color: var(--border-hover); opacity: 1; }
+    .btn-row { display: flex; gap: 0.6rem; margin-top: 1rem; }
+
+    .kbd-hint { font-size: 0.68rem; color: var(--dim); margin-top: 0.35rem; }
+    .kbd-hint kbd {
+      display: inline-block; padding: 0.1rem 0.4rem; font-family: "IBM Plex Mono", monospace;
+      font-size: 0.65rem; border: 1px solid var(--border); border-radius: 3px;
+      background: var(--surface); color: var(--muted);
+    }
+
+    /* Progress */
+    .progress-wrap { display: none; margin-top: 1rem; }
+    .progress-wrap.visible { display: block; }
+    .progress-stats { display: flex; gap: 1rem; margin-bottom: 0.5rem; font-size: 0.75rem; color: var(--muted); }
+    .progress-stats span { font-family: "IBM Plex Mono", monospace; color: var(--accent); }
+    .progress-bar-track {
+      height: 6px; background: var(--border); border-radius: 3px; overflow: hidden;
+    }
+    .progress-bar-fill {
+      height: 100%; background: var(--accent); border-radius: 3px;
+      transition: width 0.4s ease; width: 0%;
+    }
+    .progress-text { font-size: 0.78rem; color: var(--muted); margin-top: 0.4rem; }
+
+    /* Settings */
+    .settings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    @media (max-width: 520px) { .settings-grid { grid-template-columns: 1fr; } }
+
+    .setting {
+      display: flex; align-items: flex-start; gap: 0.65rem;
+      padding: 0.75rem; background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); cursor: pointer; transition: border-color 0.15s;
+    }
+    .setting:hover { border-color: var(--border-hover); }
+    .setting input[type="checkbox"] { display: none; }
+    .check-switch {
+      width: 36px; height: 20px; border-radius: 10px; background: var(--border);
+      flex-shrink: 0; margin-top: 2px; transition: background 0.2s; position: relative;
+    }
+    .check-switch::after {
+      content: ""; position: absolute; top: 3px; left: 3px;
+      width: 14px; height: 14px; border-radius: 50%;
+      background: var(--text); transition: transform 0.2s;
+    }
+    .setting input:checked + .check-switch { background: var(--accent); }
+    .setting input:checked + .check-switch::after { transform: translateX(16px); }
+    .setting-body { flex: 1; min-width: 0; }
+    .setting-label { font-size: 0.82rem; font-weight: 500; }
+    .setting-desc { font-size: 0.7rem; color: var(--muted); margin-top: 0.15rem; line-height: 1.4; }
+
+    .tip {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 16px; height: 16px; border-radius: 50%; font-size: 0.6rem;
+      background: var(--border); color: var(--muted); cursor: help;
+      margin-left: 0.35rem; flex-shrink: 0; position: relative;
+    }
+    .tip:hover { background: var(--border-hover); color: var(--text); }
+    .tip-text {
+      display: none; position: absolute; bottom: calc(100% + 8px); left: 50%;
+      transform: translateX(-50%); white-space: nowrap;
+      background: var(--text); color: var(--bg); font-size: 0.7rem;
+      padding: 0.4rem 0.7rem; border-radius: 4px; z-index: 10;
+      font-family: "DM Sans", sans-serif; font-weight: 400; pointer-events: none;
+    }
+    .tip:hover .tip-text { display: block; }
+
+    .range-row { display: flex; align-items: center; gap: 0.75rem; margin-top: 0.25rem; }
+    .range-row input[type="range"] { flex: 1; accent-color: var(--accent); }
+    .range-val {
+      font-family: "IBM Plex Mono", monospace; font-size: 0.82rem;
+      color: var(--accent); min-width: 2.5rem; text-align: right;
+    }
+
+    /* Results */
+    .result-section { display: none; }
+    .result-section.visible { display: block; }
+    .stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.75rem; margin: 1rem 0; }
+    @media (max-width: 580px) { .stat-grid { grid-template-columns: repeat(2, 1fr); } }
+    .stat {
+      background: var(--surface); padding: 1rem; border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+    }
+    .stat-label { font-size: 0.65rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.35rem; }
+    .stat-value { font-family: "IBM Plex Mono", monospace; font-size: 1.35rem; font-weight: 600; }
+    .stat-value.high { color: var(--accent); }
+    .stat-value.low { color: var(--warn); }
+
+    /* Confidence bars */
+    .page-list { margin-top: 1rem; }
+    .page-item {
+      display: grid; grid-template-columns: 60px 1fr 80px; align-items: center; gap: 0.75rem;
+      padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--border);
+      font-size: 0.82rem;
+    }
+    .page-item:last-child { border-bottom: none; }
+    .page-item .pi-page { font-family: "IBM Plex Mono", monospace; color: var(--muted); }
+    .page-item .pi-score { font-family: "IBM Plex Mono", monospace; text-align: right; }
+    .page-item .pi-score.ok { color: var(--accent); }
+    .page-item .pi-score.fallback { color: var(--warn); }
+    .conf-bar-wrap {
+      height: 8px; background: var(--border); border-radius: 4px; overflow: hidden;
+    }
+    .conf-bar-fill {
+      height: 100%; border-radius: 4px;
+      transition: width 0.5s ease, background 0.5s ease;
+    }
+    .conf-bar-fill.low { background: var(--red); }
+    .conf-bar-fill.mid { background: var(--warn); }
+    .conf-bar-fill.high { background: var(--accent); }
+
+    .errors-box {
+      display: none; margin-top: 1rem; padding: 0.75rem 1rem;
+      background: rgba(240,113,120,0.08); border: 1px solid rgba(240,113,120,0.2);
+      border-radius: var(--radius-sm); font-size: 0.78rem; color: var(--red);
+    }
+    .errors-box.visible { display: block; }
+    .empty { text-align: center; padding: 2rem; color: var(--dim); font-size: 0.85rem; }
+
+    /* Table display */
+    .table-card { margin-bottom: 1rem; }
+    .table-card-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0.65rem 0.9rem; background: var(--surface);
+      border: 1px solid var(--border); border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+      font-size: 0.78rem;
+    }
+    .table-card-header .tc-source { color: var(--accent); font-family: "IBM Plex Mono", monospace; }
+    .table-card-header .tc-meta { color: var(--muted); font-size: 0.7rem; }
+    .table-card-header .tc-edits { color: var(--warn); font-size: 0.68rem; font-weight: 600; }
+    .table-wrap-sm { overflow-x: auto; border: 1px solid var(--border); border-top: none; border-radius: 0 0 var(--radius-sm) var(--radius-sm); }
+    .table-wrap-sm table {
+      width: 100%; border-collapse: collapse; font-size: 0.72rem;
+      font-family: "IBM Plex Mono", monospace;
+    }
+    .table-wrap-sm th, .table-wrap-sm td {
+      padding: 0.35rem 0.55rem; border-right: 1px solid rgba(30,42,58,0.3);
+      text-align: right; white-space: nowrap; min-width: 60px; max-width: 160px;
+    }
+    .table-wrap-sm th {
+      background: var(--bg); color: var(--muted); font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.03em; font-size: 0.65rem;
+      position: sticky; top: 0; z-index: 1;
+    }
+    .table-wrap-sm td:first-child, .table-wrap-sm th:first-child {
+      text-align: left; font-weight: 500;
+    }
+    .table-wrap-sm tr:hover td { background: rgba(255,255,255,0.03); }
+    .table-wrap-sm td.editable { cursor: pointer; transition: background 0.15s; }
+    .table-wrap-sm td.editable:hover { background: rgba(45,212,168,0.08); }
+    .table-wrap-sm td.edited { background: rgba(240,168,69,0.15) !important; border: 1px dashed var(--warn); }
+    .table-wrap-sm td.editing { padding: 0 !important; }
+    .table-wrap-sm td.editing input {
+      width: 100%; background: var(--surface); border: 2px solid var(--accent);
+      color: var(--text); font-family: "IBM Plex Mono", monospace; font-size: 0.72rem;
+      padding: 0.35rem 0.55rem; outline: none; border-radius: 2px;
+    }
+    .table-summary { padding: 0.45rem 0.7rem; background: rgba(91,159,212,0.06); border-top: 1px solid var(--border); }
+    .table-summary span { font-family: "IBM Plex Mono", monospace; font-size: 0.65rem; color: var(--muted); margin-right: 1rem; }
+    .table-summary .ts-label { color: var(--blue); font-weight: 500; }
+    .expand-toggle { text-align: center; padding: 0.4rem; cursor: pointer; color: var(--dim); font-size: 0.72rem; transition: color 0.15s; }
+    .expand-toggle:hover { color: var(--accent); }
+    .feedback-bar {
+      display: none; margin-top: 0.75rem; padding: 0.6rem 0.85rem;
+      background: rgba(240,168,69,0.08); border: 1px solid rgba(240,168,69,0.2);
+      border-radius: var(--radius-sm); font-size: 0.75rem; color: var(--warn);
+      align-items: center; gap: 0.5rem; flex-wrap: wrap;
+    }
+    .feedback-bar.visible { display: flex; }
+    .feedback-bar .fb-count { font-weight: 600; }
+    .feedback-bar .fb-reset { color: var(--muted); cursor: pointer; text-decoration: underline; font-size: 0.7rem; }
+    .feedback-bar .fb-reset:hover { color: var(--text); }
+
+    /* Auth */
+    .auth-area { display: flex; align-items: center; gap: 0.5rem; margin-left: auto; }
+    .auth-area .user-badge {
+      font-size: 0.75rem; padding: 0.3rem 0.7rem; border-radius: 20px;
+      font-weight: 500; cursor: pointer;
+    }
+    .user-badge.free { background: rgba(91,159,212,0.12); color: var(--blue); }
+    .user-badge.pro { background: rgba(45,212,168,0.12); color: var(--accent); }
+    .user-badge.enterprise { background: rgba(191,123,250,0.12); color: #bf7bfa; }
+    .auth-btn {
+      font-size: 0.75rem; padding: 0.35rem 0.8rem; border-radius: 6px; border: 1px solid var(--border);
+      background: transparent; color: var(--text); cursor: pointer; transition: all 0.15s;
+    }
+    .auth-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    .usage-count {
+      font-size: 0.7rem; padding: 0.2rem 0.5rem; border-radius: 10px;
+      background: rgba(45,212,168,0.12); color: var(--accent);
+      font-weight: 600; margin-left: 0.3rem;
+    }
+    .usage-count.exhausted { background: rgba(255,107,107,0.15); color: #ff6b6b; }
+
+    .guest-badge {
+      font-size: 0.7rem; padding: 0.2rem 0.55rem; border-radius: 10px;
+      background: rgba(45,212,168,0.1); color: var(--accent);
+      font-weight: 500;
+    }
+    .guest-banner {
+      display: flex; align-items: center; justify-content: center;
+      padding: 0.55rem 1rem; margin-bottom: 0.75rem;
+      background: rgba(45,212,168,0.06); border: 1px solid rgba(45,212,168,0.15);
+      border-radius: var(--radius-sm); font-size: 0.78rem; color: var(--text);
+    }
+    .guest-banner.hidden { display: none; }
+    .guest-banner-text { display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; justify-content: center; }
+    .guest-banner .link-btn {
+      background: none; border: none; color: var(--accent); cursor: pointer;
+      font-weight: 600; font-size: 0.78rem; text-decoration: underline; padding: 0;
+    }
+    .guest-banner .link-btn:hover { color: #1aad7f; }
+
+    .success-msg {
+      display: none; font-size: 0.78rem; padding: 0.5rem 0.75rem;
+      background: rgba(45,212,168,0.1); border: 1px solid rgba(45,212,168,0.25);
+      border-radius: 6px; color: var(--accent); margin-bottom: 0.75rem;
+    }
+    .success-msg.visible { display: block; }
+
+    /* Google sign-in button */
+    .google-btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 0.6rem;
+      padding: 0.6rem 1.25rem; border-radius: 6px; border: 1px solid var(--border);
+      background: #fff; color: #444; cursor: pointer; font-size: 0.85rem;
+      font-weight: 500; transition: all 0.15s; width: 100%;
+    }
+    .google-btn:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.12); border-color: #ccc; }
+    .google-btn:active { background: #f5f5f5; }
+    .google-icon { width: 18px; height: 18px; flex-shrink: 0; }
+
+    .auth-divider {
+      display: flex; align-items: center; margin: 1rem 0; color: var(--muted);
+      font-size: 0.7rem;
+    }
+    .auth-divider::before, .auth-divider::after {
+      content: ""; flex: 1; border-top: 1px solid var(--border);
+    }
+    .auth-divider span { padding: 0 0.75rem; }
+
+    .tier-tag {
+      font-size: 0.6rem; padding: 0.1rem 0.35rem; border-radius: 4px;
+      font-weight: 600; margin-left: 0.25rem; vertical-align: middle;
+    }
+    .tier-tag.pro { background: rgba(45,212,168,0.18); color: var(--accent); }
+    .tier-tag.enterprise { background: rgba(191,123,250,0.18); color: #bf7bfa; }
+
+    /* Modal overlay */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55);
+      z-index: 999; justify-content: center; align-items: flex-start; padding-top: 10vh;
+    }
+    .modal-overlay.visible { display: flex; }
+    .modal-box {
+      background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 2rem; width: 400px; max-width: 90vw; box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+    }
+    .modal-box h3 { margin: 0 0 0.5rem; font-size: 1.1rem; }
+    .modal-box .form-group { margin-bottom: 1rem; }
+    .modal-box label { display: block; font-size: 0.72rem; color: var(--muted); margin-bottom: 0.3rem; text-transform: uppercase; letter-spacing: 0.05em; }
+    .modal-box input {
+      width: 100%; box-sizing: border-box; padding: 0.6rem 0.8rem; border-radius: 6px;
+      border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 0.85rem;
+    }
+    .modal-box input:focus { outline: none; border-color: var(--accent); }
+    .modal-box .form-actions { display: flex; gap: 0.5rem; justify-content: flex-end; margin-top: 1.2rem; }
+    .modal-box .link-btn { font-size: 0.75rem; color: var(--blue); cursor: pointer; background: none; border: none; text-decoration: underline; }
+    .modal-box .error-msg { font-size: 0.72rem; color: var(--red); margin-top: 0.4rem; display: none; }
+    .modal-box .error-msg.visible { display: block; }
+
+    /* Tier cards */
+    .tier-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 1.5rem; }
+    .tier-card {
+      background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm);
+      padding: 1.2rem; text-align: center; transition: border-color 0.15s;
+    }
+    .tier-card.current { border-color: var(--accent); border-width: 2px; }
+    .tier-card h4 { margin: 0 0 0.3rem; font-size: 0.9rem; }
+    .tier-card .tier-price { font-size: 1.1rem; font-weight: 700; color: var(--accent); margin-bottom: 0.5rem; }
+    .tier-card ul { text-align: left; font-size: 0.72rem; color: var(--muted); padding-left: 1.2rem; margin: 0.5rem 0; }
+    .tier-card ul li { margin-bottom: 0.2rem; }
+    .tier-card button { margin-top: 0.6rem; }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="header">
+      <div class="logo">PI</div>
+      <h1>PDF Intelligence</h1>
+      <div class="auth-area" id="authArea">
+        <span class="guest-badge" id="guestBadge">Try free — no sign-up</span>
+        <button class="auth-btn" id="loginBtn" onclick="openAuthModal()">Sign In</button>
+      </div>
+    </header>
+    <p class="subtitle">
+      Extract tables from any PDF using dual-engine AI (Docling + pdfplumber).
+      Low-confidence pages automatically fall back to Qwen cloud vision model.
+    </p>
+
+    <!-- Guest trial banner -->
+    <div class="guest-banner" id="guestBanner">
+      <div class="guest-banner-text">
+        <strong>Try it now</strong> — upload 1 PDF for free, no account needed.
+        <button class="link-btn" onclick="openAuthModal()">Sign in</button> for 2 more free uploads.
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <a class="nav-link active" href="index.html">Table Extraction</a>
+      <a class="nav-link" href="dashboard.html">Financial Verification</a>
+    </div>
+
+    <!-- 1. Upload -->
+    <div class="card">
+      <div class="card-title">1 — Upload PDF</div>
+      <div class="drop-zone" id="dropZone">
+        <input type="file" id="fileInput" accept=".pdf" />
+        <div class="icon">📄</div>
+        <div class="dz-title">Drop a PDF here, paste from clipboard, or click to browse</div>
+        <div class="dz-hint">Max 50 MB · Financial reports, invoices, scanned tables</div>
+        <div class="kbd-hint">Shortcut: <kbd>Ctrl+V</kbd> / <kbd>⌘V</kbd> to paste an image of a PDF from clipboard</div>
+      </div>
+      <div class="file-pill" id="filePill">
+        <span class="name" id="fileName">—</span>
+        <span class="size" id="fileSize">—</span>
+      </div>
+      <div class="btn-row">
+        <button class="btn" id="startBtn" disabled>Start Extraction</button>
+        <button class="btn secondary" id="resetBtn" style="display:none;">Reset</button>
+        <button class="btn secondary" id="downloadBtn" style="display:none;" disabled>Download Excel</button>
+        <span class="kbd-hint" id="enterHint" style="display:none;">or press <kbd>Enter</kbd></span>
+      </div>
+      <div class="progress-wrap" id="progressWrap">
+        <div class="progress-stats">
+          <div>Stage: <span id="progressStage">—</span></div>
+          <div>Progress: <span id="progressPage">—</span></div>
+        </div>
+        <div class="progress-bar-track"><div class="progress-bar-fill" id="progressFill"></div></div>
+        <div class="progress-text" id="progressText">Uploading and starting extraction...</div>
+      </div>
+    </div>
+
+    <!-- 2. Settings -->
+    <div class="card">
+      <div class="card-title">
+        2 — Engine Settings
+        <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:0.75rem;color:var(--dim);">(hover over <span style="color:var(--muted);">?</span> for details)</span>
+      </div>
+      <div class="settings-grid">
+        <label class="setting">
+          <input type="checkbox" id="enableDocling" checked />
+          <span class="check-switch"></span>
+          <div class="setting-body">
+            <span class="setting-label">AI Table Detection</span>
+            <span class="tip">?<span class="tip-text">Uses IBM Docling's TableFormer ML model to find and structure tables. Disable to use only the heuristic pdfplumber engine.</span></span>
+            <div class="setting-desc">Docling ML model — more accurate for complex layouts</div>
+          </div>
+        </label>
+
+        <label class="setting">
+          <input type="checkbox" id="fastMode" />
+          <span class="check-switch"></span>
+          <div class="setting-body">
+            <span class="setting-label">Fast Mode</span>
+            <span class="tip">?<span class="tip-text">Uses TableFormer FAST variant instead of ACCURATE. Roughly 2x speed boost on GPU, minimal accuracy loss for simple tables.</span></span>
+            <div class="setting-desc">2x faster, slightly lower accuracy on complex layouts</div>
+          </div>
+        </label>
+
+        <label class="setting">
+          <input type="checkbox" id="vlmMode" />
+          <span class="check-switch"></span>
+          <div class="setting-body">
+            <span class="setting-label">Vision Language Model</span>
+            <span class="tip">?<span class="tip-text">Replaces the entire table pipeline with SmolDocling, a 256M parameter VLM that processes the full page in one pass. Much faster on GPU; on CPU it's slower. Requires a pre-downloaded model.</span></span>
+            <div class="setting-desc">SmolDocling VLM — best for scanned documents</div>
+          </div>
+        </label>
+
+        <label class="setting" id="deepseekSetting">
+          <input type="checkbox" id="deepseekMode" />
+          <span class="check-switch"></span>
+          <div class="setting-body">
+            <span class="setting-label">DeepSeek High Accuracy</span>
+            <span class="tip">?<span class="tip-text">Uses DeepSeek-V3 vision model as a third-pass fallback on low-confidence pages. Dramatically improves accuracy on scanned or poorly formatted PDFs. Pro & Enterprise only.</span></span>
+            <div class="setting-desc">DeepSeek-V3 cloud vision — highest accuracy, <span id="deepseekTierNote" class="tier-tag pro">Pro+</span></div>
+          </div>
+        </label>
+
+        <div class="setting" style="flex-direction:column;align-items:stretch;gap:0.35rem;">
+          <div class="setting-body">
+            <span class="setting-label">Confidence Threshold</span>
+            <span class="tip">?<span class="tip-text">Pages scoring below this threshold will be sent to Qwen cloud vision (Alibaba DashScope API) for a second opinion. Lower values save API cost but may miss poor extractions.</span></span>
+            <div class="setting-desc">Pages below this score use Qwen cloud fallback</div>
+          </div>
+          <div class="range-row">
+            <input type="range" id="confidenceSlider" min="60" max="95" value="85" />
+            <span class="range-val" id="confidenceVal">0.85</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. Results -->
+    <div class="result-section" id="resultSection">
+      <div class="card">
+        <div class="card-title">3 — Extraction Results</div>
+        <div class="stat-grid">
+          <div class="stat">
+            <div class="stat-label">Total Pages</div>
+            <div class="stat-value" id="totalPages">—</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Tables Found</div>
+            <div class="stat-value high" id="tableCount">—</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Qwen Fallback Calls</div>
+            <div class="stat-value low" id="qwenCalls">—</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">DeepSeek Fallback Calls</div>
+            <div class="stat-value low" id="deepseekCalls">—</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Status</div>
+            <div class="stat-value" id="jobStatus">—</div>
+          </div>
+        </div>
+
+        <div class="card-title" style="margin-top:0.75rem;">Extracted Tables</div>
+        <div id="tablesArea"></div>
+
+
+        <div class="errors-box" id="errorsBox"></div>
+
+        <div class="feedback-bar" id="feedbackBar">
+          <span class="fb-count" id="feedbackCount">0 cells edited</span>
+          <span>— corrections will be annotated in your Excel download</span>
+          <span class="fb-reset" id="feedbackReset">Reset all edits</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Auth Modal (Google + Magic Link) -->
+  <div class="modal-overlay" id="authModal">
+    <div class="modal-box" id="authModalBox" style="width:380px;text-align:center;">
+      <h3>Sign in to PDF Intelligence</h3>
+      <p style="font-size:0.78rem;color:var(--muted);margin-bottom:1.25rem;">Get 2 free PDF extractions</p>
+
+      <!-- Google button -->
+      <button class="google-btn" onclick="signInWithGoogle()">
+        <svg class="google-icon" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+        Sign in with Google
+      </button>
+
+      <!-- Divider -->
+      <div class="auth-divider"><span>or sign in with email</span></div>
+
+      <!-- Email magic-link form (hidden by default) -->
+      <div id="emailLoginForm" style="display:none;">
+        <div class="form-group">
+          <label style="text-align:left;">Email</label>
+          <input type="email" id="authEmail" placeholder="you@example.com" style="text-align:left;" />
+        </div>
+        <div class="form-group" id="authNameGroup">
+          <label style="text-align:left;">Name <span style="color:var(--muted);font-weight:400;">(optional)</span></label>
+          <input type="text" id="authName" placeholder="Your name" style="text-align:left;" />
+        </div>
+        <div class="success-msg" id="authSuccess"></div>
+        <div class="error-msg" id="authError"></div>
+        <button class="btn" id="authSubmitBtn" onclick="submitMagicLink()" style="width:100%;">Send Sign-In Link</button>
+      </div>
+
+      <div class="error-msg" id="authErrorMain"></div>
+
+      <button class="link-btn" id="showEmailBtn" onclick="toggleEmailLogin()" style="margin-top:0.75rem;font-size:0.75rem;">Use email instead</button>
+      <button class="link-btn" onclick="closeAuthModal()" style="margin-top:0.35rem;font-size:0.75rem;">Cancel</button>
+    </div>
+  </div>
+
+  <!-- Subscription Panel -->
+  <div class="modal-overlay" id="subscriptionModal">
+    <div class="modal-box" style="width:600px;max-width:95vw;">
+      <h3>Your Plan</h3>
+      <p style="font-size:0.78rem;color:var(--muted);">Current: <b id="subCurrentTier">Free</b></p>
+      <div class="tier-cards" id="tierCards"></div>
+      <div style="text-align:right;margin-top:1rem;">
+        <button class="auth-btn" onclick="closeSubscriptionModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API = window.location.port === "8000" ? "" : "http://localhost:8000";
+    const $ = id => document.getElementById(id);
+
+    // ── Auth State ──────────────────────────────────────────────────
+    let authToken = localStorage.getItem("pi_token") || "";
+    let authUser = null;
+    try { authUser = JSON.parse(localStorage.getItem("pi_user") || "null"); } catch {}
+
+    function saveAuth(token, user) {
+      authToken = token;
+      authUser = user;
+      localStorage.setItem("pi_token", token);
+      localStorage.setItem("pi_user", JSON.stringify(user));
+      updateAuthUI();
+    }
+
+    function clearAuth() {
+      authToken = "";
+      authUser = null;
+      localStorage.removeItem("pi_token");
+      localStorage.removeItem("pi_user");
+      updateAuthUI();
+    }
+
+    let tierInfoCache = null;
+
+    function updateAuthUI() {
+      const area = $("authArea");
+      if (authUser) {
+        const tierColor = authUser.tier === "pro" ? "pro" : authUser.tier === "enterprise" ? "enterprise" : "free";
+        let extraBadge = "";
+        if (authUser.tier === "free" && tierInfoCache) {
+          const remaining = Math.max(0, (tierInfoCache.lifetime_limit || 2) - (tierInfoCache.lifetime_uploads || 0));
+          extraBadge = `<span class="usage-count ${remaining === 0 ? 'exhausted' : ''}">${remaining} upload${remaining !== 1 ? 's' : ''} left</span>`;
+        }
+        area.innerHTML = `
+          <span class="user-badge ${tierColor}" onclick="openSubscriptionModal()" title="Click to manage plan">
+            ${authUser.email} · ${authUser.tier.toUpperCase()}
+          </span>
+          ${extraBadge}
+          <button class="auth-btn" onclick="clearAuth()" title="Logout">Logout</button>
+        `;
+      } else {
+        area.innerHTML = `
+          <span class="guest-badge" id="guestBadge">Try free — no sign-up</span>
+          <button class="auth-btn" id="loginBtn" onclick="openAuthModal()">Sign In</button>
+        `;
+      }
+      // Show/hide guest banner
+      const banner = $("guestBanner");
+      if (banner) {
+        banner.classList.toggle("hidden", !!authUser);
+      }
+      // Update DeepSeek toggle based on tier
+      updateDeepseekToggle();
+    }
+
+    function updateDeepseekToggle() {
+      const cb = $("deepseekMode");
+      const label = document.getElementById("deepseekSetting");
+      const note = $("deepseekTierNote");
+      if (!cb || !label) return;
+
+      if (!authUser || authUser.tier === "free") {
+        cb.disabled = true;
+        cb.checked = false;
+        label.style.opacity = "0.5";
+        note.textContent = "Pro+";
+        note.className = "tier-tag pro";
+      } else {
+        cb.disabled = false;
+        label.style.opacity = "1";
+        note.textContent = authUser.tier === "pro" ? "Pro" : "Enterprise";
+        note.className = authUser.tier === "pro" ? "tier-tag pro" : "tier-tag enterprise";
+      }
+    }
+
+    // ── Auth Modal (Google + Magic Link) ────────────────────────────
+    function openAuthModal() {
+      $("authEmail").value = "";
+      $("authName").value = "";
+      $("authError").classList.remove("visible");
+      $("authErrorMain").classList.remove("visible");
+      $("authSuccess").classList.remove("visible");
+      $("authSubmitBtn").disabled = false;
+      $("authSubmitBtn").textContent = "Send Sign-In Link";
+      $("emailLoginForm").style.display = "none";
+      $("showEmailBtn").textContent = "Use email instead";
+      $("authModal").classList.add("visible");
+    }
+
+    function closeAuthModal() {
+      $("authModal").classList.remove("visible");
+    }
+
+    function toggleEmailLogin() {
+      const form = $("emailLoginForm");
+      const btn = $("showEmailBtn");
+      if (form.style.display === "none") {
+        form.style.display = "block";
+        btn.textContent = "Back to Google sign-in";
+      } else {
+        form.style.display = "none";
+        btn.textContent = "Use email instead";
+      }
+    }
+
+    function signInWithGoogle() {
+      window.location.href = `${API}/api/auth/google`;
+    }
+
+    async function submitMagicLink() {
+      const email = $("authEmail").value.trim();
+      const name = $("authName").value.trim();
+      const err = $("authError");
+      const succ = $("authSuccess");
+
+      if (!email || !email.includes("@")) {
+        err.textContent = "Please enter a valid email address";
+        err.classList.add("visible");
+        return;
+      }
+
+      err.classList.remove("visible");
+      succ.classList.remove("visible");
+      $("authSubmitBtn").disabled = true;
+      $("authSubmitBtn").textContent = "Sending...";
+
+      try {
+        const res = await fetch(`${API}/api/auth/magic-link`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, name }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || "Failed to send link");
+
+        succ.textContent = "Check your inbox! We sent a sign-in link to " + email + ". Click it to sign in.";
+        succ.classList.add("visible");
+        $("authSubmitBtn").textContent = "Sent!";
+        setTimeout(() => { $("authSubmitBtn").textContent = "Send Sign-In Link"; $("authSubmitBtn").disabled = false; }, 3000);
+      } catch (e) {
+        err.textContent = e.message;
+        err.classList.add("visible");
+        $("authSubmitBtn").disabled = false;
+        $("authSubmitBtn").textContent = "Send Sign-In Link";
+      }
+    }
+
+    // ── Subscription Modal ──────────────────────────────────────────
+    async function openSubscriptionModal() {
+      if (!authUser) return;
+      $("subCurrentTier").textContent = authUser.tier.toUpperCase();
+      $("subscriptionModal").classList.add("visible");
+
+      try {
+        const res = await fetch(`${API}/api/auth/me`, {
+          headers: authToken ? { "Authorization": `Bearer ${authToken}` } : {},
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        tierInfoCache = data.tier_info || null;
+        updateAuthUI();  // refresh counter
+        renderTierCards(data.available_tiers || [], data.user.tier, data.tier_info);
+      } catch {}
+    }
+
+    function closeSubscriptionModal() {
+      $("subscriptionModal").classList.remove("visible");
+    }
+
+    function renderTierCards(tiers, currentTier, tierInfo) {
+      const container = $("tierCards");
+      container.innerHTML = tiers.map(t => `
+        <div class="tier-card ${t.id === currentTier ? 'current' : ''}">
+          <h4>${t.name}</h4>
+          <div class="tier-price">${t.price}</div>
+          <ul>${t.features.map(f => `<li>${f}</li>`).join("")}</ul>
+          ${t.id === currentTier
+            ? `<button class="btn" disabled style="opacity:0.5;width:100%;">Current Plan</button>`
+            : `<button class="btn" onclick="upgradeTier('${t.id}')" style="width:100%;">${currentTier === 'free' ? 'Upgrade' : 'Switch'} to ${t.name}</button>`
+          }
+        </div>
+      `).join("");
+    }
+
+    async function upgradeTier(tier) {
+      try {
+        const res = await fetch(`${API}/api/auth/upgrade?tier=${tier}`, {
+          method: "POST",
+          headers: { "Authorization": `Bearer ${authToken}` },
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || "Upgrade failed");
+
+        // Refresh user info
+        authUser.tier = tier;
+        localStorage.setItem("pi_user", JSON.stringify(authUser));
+        updateAuthUI();
+        closeSubscriptionModal();
+        alert(`Upgraded to ${tier.toUpperCase()}!`);
+      } catch (e) {
+        alert(e.message);
+      }
+    }
+
+    // ── Auth header injection ───────────────────────────────────────
+    function authFetch(url, options = {}) {
+      const headers = { ...(options.headers || {}) };
+      if (authToken) headers["Authorization"] = `Bearer ${authToken}`;
+      // Don't set Content-Type for FormData — browser sets it with boundary
+      if (options.body instanceof FormData) delete headers["Content-Type"];
+      return fetch(url, { ...options, headers });
+    }
+
+    // Initialize auth UI
+    updateAuthUI();
+
+    // Click outside to close modals
+    document.addEventListener("click", e => {
+      if (e.target.id === "authModal") closeAuthModal();
+      if (e.target.id === "subscriptionModal") closeSubscriptionModal();
+    });
+
+    // ── Original consts ────────────────────────────────────────────
+
+    const dropZone = $("dropZone");
+    const fileInput = $("fileInput");
+    const filePill = $("filePill");
+    const startBtn = $("startBtn");
+    const resetBtn = $("resetBtn");
+    const enterHint = $("enterHint");
+    const progressWrap = $("progressWrap");
+    const progressFill = $("progressFill");
+    const progressText = $("progressText");
+    const progressStage = $("progressStage");
+    const progressPage = $("progressPage");
+    const resultSection = $("resultSection");
+    const slider = $("confidenceSlider");
+    const sliderVal = $("confidenceVal");
+    let currentJobId = null;
+    let _edits = [];
+    let selectedFile = null;
+    let pollTimer = null;
+
+    // Number-aware cell formatting for crisp display
+    const _NUMERIC_RE = /^[\s$€¥£%()\-\u2013\u2014]*(\d[\d,.\u00A0]*)[\s%]*\)?$/;
+
+    function _formatCell(raw) {
+      const s = (raw || "").trim();
+      if (!s || s === "-" || s === "—" || s === "–") return s;
+      // Detect percentage
+      const pctMatch = /^([\d,.]+)\s*%$/.exec(s);
+      if (pctMatch) {
+        const n = parseFloat(pctMatch[1].replace(/,/g, ""));
+        if (!isNaN(n)) return n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + "%";
+        return s;
+      }
+      // Detect parenthetical negatives like "(123,456)"
+      const parenMatch = /^\(([\d,.]+)\)$/.exec(s);
+      if (parenMatch) {
+        const n = parseFloat(parenMatch[1].replace(/,/g, ""));
+        if (!isNaN(n)) return "(" + n.toLocaleString("en-US") + ")";
+        return s;
+      }
+      // Detect plain numbers (possibly with $ prefix)
+      const m = _NUMERIC_RE.exec(s);
+      if (m) {
+        const num = parseFloat(m[1].replace(/[,\u00A0]/g, ""));
+        if (!isNaN(num)) {
+          // Keep original precision: if input had decimals, show them
+          const hasDecimals = m[1].includes(".");
+          const opts = hasDecimals
+            ? { minimumFractionDigits: 2, maximumFractionDigits: 2 }
+            : { maximumFractionDigits: 0 };
+          let formatted = num.toLocaleString("en-US", opts);
+          if (s.startsWith("$")) formatted = "$" + formatted;
+          if (s.startsWith("(") || (s.startsWith("-") && !s.startsWith("-$"))) formatted = "-" + formatted;
+          return formatted;
+        }
+      }
+      return s;
+    }
+
+    // Restore saved settings
+    const saved = loadSettings();
+    if (saved) {
+      slider.value = saved.threshold || 85;
+      sliderVal.textContent = ((saved.threshold || 85) / 100).toFixed(2);
+      $("enableDocling").checked = saved.enableDocling !== false;
+      $("fastMode").checked = saved.fastMode === true;
+      $("vlmMode").checked = saved.vlmMode === true;
+      $("deepseekMode").checked = saved.deepseekMode === true;
+    }
+
+    slider.addEventListener("input", () => {
+      sliderVal.textContent = (slider.value / 100).toFixed(2);
+      saveSettings();
+    });
+
+    // Save settings on toggle
+    document.querySelectorAll(".setting input[type=checkbox]").forEach(cb => {
+      cb.addEventListener("change", saveSettings);
+    });
+
+    function saveSettings() {
+      localStorage.setItem("pi_settings", JSON.stringify({
+        threshold: parseInt(slider.value),
+        enableDocling: $("enableDocling").checked,
+        fastMode: $("fastMode").checked,
+        vlmMode: $("vlmMode").checked,
+        deepseekMode: $("deepseekMode").checked,
+      }));
+    }
+
+    function loadSettings() {
+      try { return JSON.parse(localStorage.getItem("pi_settings")); } catch { return null; }
+    }
+
+    // File selection
+    dropZone.addEventListener("click", () => fileInput.click());
+    dropZone.addEventListener("dragover", e => { e.preventDefault(); dropZone.classList.add("dragover"); });
+    dropZone.addEventListener("dragleave", () => dropZone.classList.remove("dragover"));
+    dropZone.addEventListener("drop", e => {
+      e.preventDefault(); dropZone.classList.remove("dragover");
+      if (e.dataTransfer.files.length) selectFile(e.dataTransfer.files[0]);
+    });
+    fileInput.addEventListener("change", () => { if (fileInput.files.length) selectFile(fileInput.files[0]); });
+
+    // #7: Clipboard paste
+    document.addEventListener("paste", e => {
+      const items = e.clipboardData?.items;
+      if (!items) return;
+      for (const item of items) {
+        if (item.kind === "file" && item.type === "application/pdf") {
+          e.preventDefault();
+          selectFile(item.getAsFile());
+          return;
+        }
+      }
+    });
+
+    // #3: Enter key
+    document.addEventListener("keydown", e => {
+      if (e.key === "Enter" && selectedFile && !startBtn.disabled) {
+        e.preventDefault();
+        runExtraction();
+      }
+    });
+
+    function selectFile(file) {
+      if (!file.name.toLowerCase().endsWith(".pdf")) {
+        alert("Only PDF files are supported.");
+        return;
+      }
+      selectedFile = file;
+      $("fileName").textContent = file.name;
+      $("fileSize").textContent = formatBytes(file.size);
+      filePill.classList.add("visible");
+      startBtn.disabled = false;
+      enterHint.style.display = "inline";
+      resultSection.classList.remove("visible");
+      resetBtn.style.display = "inline-flex";
+    }
+
+    resetBtn.addEventListener("click", () => {
+      selectedFile = null;
+      fileInput.value = "";
+      filePill.classList.remove("visible");
+      startBtn.disabled = true;
+      enterHint.style.display = "none";
+      resultSection.classList.remove("visible");
+      resetBtn.style.display = "none";
+      progressWrap.classList.remove("visible");
+      const dBtn = $("downloadBtn");
+      dBtn.style.display = "none";
+      dBtn.disabled = true;
+      dBtn.textContent = "Download Excel";
+      clearPolling();
+    });
+
+    startBtn.addEventListener("click", runExtraction);
+
+    async function runExtraction() {
+      if (!selectedFile) return;
+
+      clearPolling();
+      progressWrap.classList.add("visible");
+      progressFill.style.width = "5%";
+      progressText.textContent = "Uploading PDF...";
+      progressStage.textContent = "upload";
+      progressPage.textContent = "—";
+      startBtn.disabled = true;
+      resultSection.classList.remove("visible");
+
+      const form = new FormData();
+      form.append("file", selectedFile);
+      form.append("enable_docling", $("enableDocling").checked ? "1" : "0");
+      form.append("fast_mode", $("fastMode").checked ? "1" : "0");
+      form.append("use_vlm", $("vlmMode").checked ? "1" : "0");
+      form.append("use_deepseek", $("deepseekMode").checked ? "1" : "0");
+      form.append("confidence_threshold", (slider.value / 100).toFixed(2));
+
+      try {
+        const res = await authFetch(`${API}/api/upload`, { method: "POST", body: form });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || `HTTP ${res.status}`);
+
+        if (data.status === "completed") {
+          // Fast path: already done
+          showResult(data);
+          return;
+        }
+
+        // #4: Poll for progress
+        pollJob(data.job_id);
+      } catch (err) {
+        progressText.textContent = "Failed: " + err.message;
+        startBtn.disabled = false;
+        // If guest limit, prompt to sign in
+        if (err.message.includes("Guest trial") || err.message.includes("guest")) {
+          setTimeout(() => openAuthModal(), 500);
+        }
+      }
+    }
+
+    function pollJob(jobId) {
+      progressText.textContent = "Extracting tables...";
+      progressStage.textContent = "starting";
+      progressPage.textContent = "—";
+
+      pollTimer = setInterval(async () => {
+        try {
+          const res = await authFetch(`${API}/api/jobs/${jobId}`);
+          const data = await res.json();
+          if (!res.ok) return;
+
+          // Update progress bar
+          const stage = data.processing_stage || "";
+          const current = data.processing_page || 0;
+          const total = data.total_pages || 1;
+
+          progressStage.textContent = stage || "processing";
+          progressPage.textContent = total ? `${current}/${total}` : "—";
+
+          if (stage === "extracting") {
+            progressFill.style.width = "15%";
+          } else if (stage === "scoring" && total > 0) {
+            progressFill.style.width = (15 + (current / total) * 40) + "%";
+            progressText.textContent = `Scoring confidence for ${current}/${total} pages...`;
+          } else if (stage === "qwen" && total > 0) {
+            progressFill.style.width = (55 + (current / total) * 40) + "%";
+            progressText.textContent = `Qwen fallback for ${current}/${total} low-confidence pages...`;
+          }
+
+          if (data.status === "completed" || data.status === "failed") {
+            clearPolling();
+            progressFill.style.width = "100%";
+            showResult(data);
+          }
+        } catch {
+          // Ignore polling errors
+        }
+      }, 800);
+    }
+
+    function clearPolling() {
+      if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
+    }
+
+    function showResult(data) {
+      progressWrap.classList.remove("visible");
+      resultSection.classList.add("visible");
+      startBtn.disabled = false;
+
+      $("totalPages").textContent = data.total_pages ?? "—";
+      $("tableCount").textContent = data.table_count ?? "—";
+      $("qwenCalls").textContent = data.qwen_calls ?? "—";
+      $("deepseekCalls").textContent = data.deepseek_calls ?? "—";
+      $("jobStatus").textContent = data.status ?? "—";
+
+      if (data.status === "completed") {
+        currentJobId = data.job_id;
+        try { localStorage.setItem("pi_last_result", JSON.stringify(data)); } catch {}
+        loadTablesAndRender(data.job_id);
+      }
+
+      const errBox = $("errorsBox");
+      if (data.errors?.length) {
+        errBox.textContent = data.errors.join("; ");
+        errBox.classList.add("visible");
+      } else {
+        errBox.classList.remove("visible");
+      }
+
+      if (data.output_ready || data.status === "completed") {
+        const btn = $("downloadBtn");
+        btn.style.display = "inline-flex";
+        btn.disabled = false;
+        btn.textContent = _edits.length > 0
+          ? `Download Excel (${_edits.length} edit${_edits.length !== 1 ? "s" : ""})`
+          : "Download Excel";
+      }
+    }
+
+    // Feedback bar
+    function updateFeedbackBar() {
+      const bar = $("feedbackBar");
+      const count = _edits.length;
+      $("feedbackCount").textContent = `${count} cell${count !== 1 ? "s" : ""} edited`;
+      bar.classList.toggle("visible", count > 0);
+      const btn = $("downloadBtn");
+      btn.textContent = count > 0
+        ? `Download Excel (${count} edit${count !== 1 ? "s" : ""})`
+        : "Download Excel";
+    }
+
+    $("feedbackReset").addEventListener("click", () => {
+      _edits = [];
+      document.querySelectorAll("td.edited").forEach(td => td.classList.remove("edited"));
+      updateFeedbackBar();
+      if (currentJobId) loadTablesAndRender(currentJobId);
+    });
+
+    // Download with feedback saved first
+    $("downloadBtn").addEventListener("click", async () => {
+      if (!currentJobId) return;
+      const btn = $("downloadBtn");
+      btn.disabled = true;
+      btn.textContent = "Saving...";
+
+      if (_edits.length > 0) {
+        try {
+          const res = await authFetch(`${API}/api/jobs/${currentJobId}/feedback`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ edits: _edits }),
+          });
+          if (!res.ok) console.warn("Feedback save failed", await res.text());
+        } catch (e) { console.warn("Feedback save error", e); }
+      }
+
+      window.open(`${API}/api/jobs/${currentJobId}/download`, "_blank");
+      btn.disabled = false;
+      btn.textContent = _edits.length > 0
+        ? `Download Excel (${_edits.length} edit${_edits.length !== 1 ? "s" : ""})`
+        : "Download Excel";
+    });
+
+    // Fetch tables and render
+    async function loadTablesAndRender(jobId) {
+      const area = $("tablesArea");
+      area.innerHTML = `<div class="empty">Loading tables...</div>`;
+      try {
+        const res = await authFetch(`${API}/api/jobs/${jobId}/tables`);
+        if (!res.ok) {
+          area.innerHTML = `<div class="empty">Tables not available</div>`;
+          return;
+        }
+        const data = await res.json();
+        renderTables(data.tables || []);
+      } catch {
+        area.innerHTML = `<div class="empty">Failed to load tables</div>`;
+      }
+    }
+
+    function renderTables(allTables) {
+      const area = $("tablesArea");
+      if (!allTables.length) {
+        area.innerHTML = `<div class="empty">No tables extracted from this PDF.</div>`;
+        return;
+      }
+
+      // Sort by importance (row_count * col_count * confidence)
+      const sorted = [...allTables].sort((a, b) => 
+        (b.row_count * b.col_count * b.confidence) - (a.row_count * a.col_count * a.confidence)
+      );
+      // Reassign table_id to sorted position for display
+      sorted.forEach((t, idx) => { t.table_id = idx; });
+
+      // Rebuild _edits as a set of keys for quick lookup (using sheet_index for key)
+      const editKeys = new Set(_edits.map(e => `${e.sheet_index}|${e.row}|${e.col}`));
+      const showAll = area.dataset.showAll === "true";
+      const displayTables = showAll ? sorted : sorted.slice(0, 5);
+      const hiddenCount = sorted.length - 5;
+
+      let html = "";
+      displayTables.forEach((tbl, displayIdx) => {
+        const tid = tbl.table_id;
+        const confidencePct = Math.round(tbl.confidence * 100);
+        const level = confidencePct >= 85 ? "high" : confidencePct >= 70 ? "mid" : "low";
+
+        // Count edits for this table
+        const tableEdits = _edits.filter(e => e.table_id === tid);
+        const editBadge = tableEdits.length > 0
+          ? ` <span class="tc-edits">${tableEdits.length} correction${tableEdits.length !== 1 ? "s" : ""}</span>`
+          : "";
+
+        html += `
+        <div class="table-card">
+          <div class="table-card-header">
+            <span>
+              <span class="tc-source">Table ${tid + 1}</span>
+              <span class="tc-meta" style="margin-left:0.5rem;">Source: ${tbl.source} · Page ${tbl.page_num} · ${tbl.row_count}×${tbl.col_count}</span>
+            </span>
+            <span>
+              <span class="tc-meta">Confidence: <b style="color:var(--${level === "high" ? "accent" : level === "mid" ? "warn" : "red"});">${confidencePct}%</b></span>
+              ${editBadge}
+            </span>
+          </div>
+          <div class="table-wrap-sm" style="max-height:420px; overflow:auto;">
+            <table id="table-${tid}">
+              <thead><tr>${tbl.headers.map(h => `<th>${h || "&nbsp;"}</th>`).join("")}</tr></thead>
+              <tbody>
+                ${tbl.rows.map((row, ri) => `
+                  <tr>
+                    ${row.cells.map((cell, ci) => {
+                      const key = `${tbl.sheet_index ?? tid}|${ri}|${ci}`;
+                      const isEdited = editKeys.has(key);
+                      const cls = isEdited ? "edited" : "editable";
+                      const display = _formatCell(cell);
+                      const title = isEdited
+                        ? (() => { const e = _edits.find(ee => ee.sheet_index === (tbl.sheet_index ?? tid) && ee.row === ri && ee.col === ci); return `Original: "${e?.original}" | Double-click to edit again`; })()
+                        : "Double-click to edit";
+                      return `<td class="${cls}" data-tid="${tid}" data-sid="${tbl.sheet_index ?? tid}" data-ri="${ri}" data-ci="${ci}" data-raw="${cell.replace(/"/g, '&quot;')}" title="${title}">${display}</td>`;
+                    }).join("")}
+                  </tr>
+                `).join("")}
+              </tbody>
+            </table>
+          </div>
+          ${renderSummary(tbl.summary)}
+        </div>`;
+      });
+
+      if (!showAll && hiddenCount > 0) {
+        html += `<div class="expand-toggle" id="expandToggle">Show all ${allTables.length} tables (${hiddenCount} more hidden)</div>`;
+      } else if (showAll && allTables.length > 5) {
+        html += `<div class="expand-toggle" id="expandToggle">Show only top 5 tables</div>`;
+      }
+
+      area.innerHTML = html;
+
+      // Bind expand toggle
+      const toggle = $("expandToggle");
+      if (toggle) {
+        toggle.addEventListener("click", () => {
+          area.dataset.showAll = showAll ? "false" : "true";
+          renderTables(allTables);
+        });
+      }
+
+      // Bind double-click editing
+      area.querySelectorAll("td.editable, td.edited").forEach(td => {
+        td.addEventListener("dblclick", startEditing);
+      });
+
+      updateFeedbackBar();
+    }
+
+    function renderSummary(summary) {
+      if (!summary || !summary.columns || !Object.keys(summary.columns).length) return "";
+      const cols = summary.columns;
+      // Show up to 5 interesting columns
+      const entries = Object.entries(cols).sort(([, a], [, b]) => {
+        const aScore = Math.abs(a.avg || 0) + Math.abs(a.sum || 0);
+        const bScore = Math.abs(b.avg || 0) + Math.abs(b.sum || 0);
+        return bScore - aScore;
+      }).slice(0, 5);
+
+      return `
+        <div class="table-summary">
+          ${entries.map(([, info]) => `
+            <span><span class="ts-label">${info.header || "—"}</span> avg:${(info.avg || 0).toLocaleString()} sum:${(info.sum || 0).toLocaleString()}</span>
+          `).join("")}
+        </div>`;
+    }
+
+    function startEditing(e) {
+      const td = e.currentTarget;
+      if (td.classList.contains("editing")) return;
+
+      const rawVal = td.dataset.raw || td.textContent;
+      const formattedVal = td.textContent;
+      const tid = parseInt(td.dataset.tid);
+      const sid = parseInt(td.dataset.sid ?? tid);
+      const ri = parseInt(td.dataset.ri);
+      const ci = parseInt(td.dataset.ci);
+
+      td.classList.add("editing");
+      td.innerHTML = `<input type="text" value="${rawVal}">`;
+      const input = td.querySelector("input");
+      input.focus();
+      input.select();
+
+      function finishEdit(save) {
+        td.classList.remove("editing");
+        const newRaw = save ? input.value.trim() : rawVal;
+        const newDisplay = _formatCell(newRaw);
+        td.textContent = newDisplay;
+        td.dataset.raw = newRaw;
+        td.classList.remove("editing");
+
+        if (save && newRaw !== rawVal) {
+          td.classList.add("edited");
+          td.title = `Original: "${formattedVal}" | Double-click to edit again`;
+
+          const existingIdx = _edits.findIndex(e => e.sheet_index === sid && e.row === ri && e.col === ci);
+          if (existingIdx >= 0) {
+            if (newRaw === _edits[existingIdx].original) {
+              _edits.splice(existingIdx, 1);
+              td.classList.remove("edited");
+              td.classList.add("editable");
+              td.title = "Double-click to edit";
+            } else {
+              _edits[existingIdx].corrected = newRaw;
+            }
+          } else {
+            _edits.push({ table_id: tid, sheet_index: sid, row: ri, col: ci, original: rawVal, corrected: newRaw });
+          }
+          updateFeedbackBar();
+          if (currentJobId) refreshTableDisplay();
+        }
+      }
+
+      input.addEventListener("blur", () => finishEdit(true));
+      input.addEventListener("keydown", ev => {
+        if (ev.key === "Enter") finishEdit(true);
+        else if (ev.key === "Escape") finishEdit(false);
+      });
+    }
+
+    async function refreshTableDisplay() {
+      if (!currentJobId) return;
+      try {
+        const res = await authFetch(`${API}/api/jobs/${currentJobId}/tables`);
+        if (!res.ok) return;
+        const data = await res.json();
+        renderTables(data.tables || []);
+      } catch {}
+    }
+
+    function formatBytes(b) {
+      if (b < 1024) return b + " B";
+      if (b < 1024*1024) return (b/1024).toFixed(1) + " KB";
+      return (b/(1024*1024)).toFixed(1) + " MB";
+    }
+
+    // Restore last result on page load
+    try {
+      const cached = JSON.parse(localStorage.getItem("pi_last_result"));
+      if (cached && cached.status === "completed") {
+        showResult(cached);
+      }
+    } catch {}
+
+    // Checkbox click fix (label wrapping input double-toggles)
+    document.querySelectorAll(".setting").forEach(el => {
+      el.addEventListener("click", function(e) {
+        if (e.target.tagName === "INPUT" || e.target.closest(".tip")) return;
+        const cb = this.querySelector("input[type=checkbox]");
+        if (cb) { cb.checked = !cb.checked; cb.dispatchEvent(new Event("change")); }
+      });
+    });
+  </script>
+</body>
+</html>

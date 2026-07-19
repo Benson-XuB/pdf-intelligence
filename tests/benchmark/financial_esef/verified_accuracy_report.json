@@ -1,0 +1,130 @@
+{
+  "pipeline": "eu_verified_financials (ESEF inline XHTML grid)",
+  "corpus": "financial_esef",
+  "tested_count": 9,
+  "available_count": 10,
+  "template_count": 10,
+  "overall_field_coverage": 0.9744,
+  "overall_identity_pass_rate": 0.5556,
+  "companies": [
+    {
+      "id": "ASML",
+      "name": "ASML Holding N.V.",
+      "lei": "724500Y6DUVHQD6OXN27",
+      "fiscal_year": 2025,
+      "xhtml_path": "/Users/xubaotian/pdf-intelligence/tests/benchmark/financial_esef/asml_annual.xhtml",
+      "field_coverage": 1.0,
+      "identity_pass_rate": 1.0,
+      "identity_all_passed": true,
+      "field_hits": "26/26",
+      "errors": []
+    },
+    {
+      "id": "SANOFI",
+      "name": "SANOFI",
+      "lei": "549300E9PC51EN656011",
+      "fiscal_year": 2025,
+      "xhtml_path": "/Users/xubaotian/pdf-intelligence/tests/benchmark/financial_esef/sanofi_annual.xhtml",
+      "field_coverage": 1.0,
+      "identity_pass_rate": 0.0,
+      "identity_all_passed": false,
+      "field_hits": "26/26",
+      "errors": [
+        "定位器未找到报表类型 ['cashflow']，启用 XHTML 全表搜索兜底"
+      ]
+    },
+    {
+      "id": "TTE",
+      "name": "TotalEnergies SE",
+      "lei": "529900S21EQ1BO4ESM68",
+      "fiscal_year": 2025,
+      "xhtml_path": "/Users/xubaotian/pdf-intelligence/tests/benchmark/financial_esef/tte_annual.xhtml",
+      "field_coverage": 0.8846153846153846,
+      "identity_pass_rate": 0.0,
+      "identity_all_passed": false,
+      "field_hits": "23/26",
+      "errors": [
+        "定位器未找到报表类型 ['income']，启用 XHTML 全表搜索兜底",
+        "PDF 未提取到: gross_profit"
+      ]
+    },
+    {
+      "id": "OR",
+      "name": "L'OREAL",
+      "lei": "529900JI1GG6F7RKVI53",
+      "fiscal_year": 2025,
+      "xhtml_path": "/Users/xubaotian/pdf-intelligence/tests/benchmark/financial_esef/or_annual.xhtml",
+      "field_coverage": 1.0,
+      "identity_pass_rate": 0.0,
+      "identity_all_passed": false,
+      "field_hits": "26/26",
+      "errors": [
+        "定位器未找到报表类型 ['cashflow']，启用 XHTML 全表搜索兜底"
+      ]
+    },
+    {
+      "id": "SU",
+      "name": "Schneider Electric SE",
+      "lei": "969500A1YF1XUYYXS284",
+      "fiscal_year": 2025,
+      "xhtml_path": "/Users/xubaotian/pdf-intelligence/tests/benchmark/financial_esef/su_annual.xhtml",
+      "field_coverage": 1.0,
+      "identity_pass_rate": 0.0,
+      "identity_all_passed": false,
+      "field_hits": "26/26",
+      "errors": []
+    },
+    {
+      "id": "PHIA",
+      "name": "Koninklijke Philips N.V.",
+      "lei": "H1FJE8H61JGM1JSGM897",
+      "fiscal_year": 2025,
+      "xhtml_path": "/Users/xubaotian/pdf-intelligence/tests/benchmark/financial_esef/phia_annual.xhtml",
+      "field_coverage": 1.0,
+      "identity_pass_rate": 1.0,
+      "identity_all_passed": true,
+      "field_hits": "26/26",
+      "errors": [
+        "定位器未找到报表类型 ['balance', 'income']，启用 XHTML 全表搜索兜底"
+      ]
+    },
+    {
+      "id": "ADYEN",
+      "name": "Adyen N.V.",
+      "lei": "724500973ODKK3IFQ447",
+      "fiscal_year": 2025,
+      "xhtml_path": "/Users/xubaotian/pdf-intelligence/tests/benchmark/financial_esef/adyen_annual.xhtml",
+      "field_coverage": 0.9230769230769231,
+      "identity_pass_rate": 1.0,
+      "identity_all_passed": true,
+      "field_hits": "24/26",
+      "errors": [
+        "PDF 未提取到: gross_profit"
+      ]
+    },
+    {
+      "id": "HEIO",
+      "name": "Heineken Holding N.V.",
+      "lei": "724500M1WJLFM9TYBS04",
+      "fiscal_year": 2025,
+      "xhtml_path": "/Users/xubaotian/pdf-intelligence/tests/benchmark/financial_esef/heio_annual.xhtml",
+      "field_coverage": 0.9615384615384616,
+      "identity_pass_rate": 1.0,
+      "identity_all_passed": true,
+      "field_hits": "25/26",
+      "errors": []
+    },
+    {
+      "id": "LVMH",
+      "name": "LVMH",
+      "lei": "IOG4E947OATN0KJYSD45",
+      "fiscal_year": 2024,
+      "xhtml_path": "/Users/xubaotian/pdf-intelligence/tests/benchmark/financial_esef/lvmh_annual.xhtml",
+      "field_coverage": 1.0,
+      "identity_pass_rate": 1.0,
+      "identity_all_passed": true,
+      "field_hits": "26/26",
+      "errors": []
+    }
+  ]
+}

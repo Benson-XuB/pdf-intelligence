@@ -1,0 +1,154 @@
+{
+  "pipeline": "verified_financials (SEC XBRL × PDF text)",
+  "corpus": "financial_10k_corpus_tier_b",
+  "template_count": 4,
+  "tested_count": 4,
+  "missing_templates": [],
+  "hk_templates": "无 — tests/benchmark/financial_hk/ 为空，需先找港股年报 PDF",
+  "overall_pdf_extraction_accuracy": 0.9362,
+  "overall_verification_rate": 0.6329,
+  "total_reconciliation_mismatches": 12,
+  "threshold_go": 0.9,
+  "threshold_stop": 0.8,
+  "verdict": "GO — 模版准确度达标，可继续产品化",
+  "tier_stats": {
+    "B": {
+      "count": 4,
+      "pdf_extraction_accuracy": 0.9362
+    }
+  },
+  "companies": [
+    {
+      "id": "AMD",
+      "name": "AMD",
+      "pdf": "/Users/xubaotian/pdf-intelligence/tests/benchmark/financial_10k/amd_2024_10k.pdf",
+      "tier": "B",
+      "pdf_extraction_accuracy": 0.8333,
+      "verification_rate": 0.7741935483870968,
+      "trust_score": 0.7308,
+      "production_ready": false,
+      "recon_matched": 24,
+      "recon_mismatch": 7,
+      "field_hits": "10/12",
+      "errors": [
+        "缺少 XBRL 标签: total_liabilities",
+        "PDF 未提取到: eps_basic"
+      ],
+      "misses": [
+        {
+          "field_id": "operating_income",
+          "gt_key": "operating_income",
+          "period_index": 1,
+          "expected": 1264.0,
+          "actual": null,
+          "matched": false
+        },
+        {
+          "field_id": "net_income",
+          "gt_key": "net_income",
+          "period_index": 1,
+          "expected": 1320.0,
+          "actual": null,
+          "matched": false
+        }
+      ]
+    },
+    {
+      "id": "UNH",
+      "name": "UnitedHealth",
+      "pdf": "/Users/xubaotian/pdf-intelligence/tests/benchmark/financial_10k/unh_10k.htm",
+      "tier": "B",
+      "pdf_extraction_accuracy": 0.0,
+      "verification_rate": 0.0,
+      "trust_score": 0.5923,
+      "production_ready": false,
+      "recon_matched": 0,
+      "recon_mismatch": 0,
+      "field_hits": "0/0",
+      "errors": [
+        "缺少 XBRL 标签: gross_profit",
+        "PDF 未提取到: revenue",
+        "PDF 未提取到: gross_profit",
+        "PDF 未提取到: operating_income",
+        "PDF 未提取到: net_income",
+        "PDF 未提取到: eps_basic",
+        "缺少报表页: balance",
+        "缺少报表页: balance",
+        "缺少报表页: balance",
+        "缺少报表页: balance",
+        "缺少报表页: cashflow",
+        "缺少报表页: cashflow",
+        "缺少报表页: cashflow",
+        "缺少报表页: cashflow"
+      ],
+      "misses": []
+    },
+    {
+      "id": "V",
+      "name": "Visa",
+      "pdf": "/Users/xubaotian/pdf-intelligence/tests/benchmark/financial_10k/v_2024_10k.pdf",
+      "tier": "B",
+      "pdf_extraction_accuracy": 1.0,
+      "verification_rate": 0.875,
+      "trust_score": 0.6308,
+      "production_ready": false,
+      "recon_matched": 21,
+      "recon_mismatch": 3,
+      "field_hits": "21/21",
+      "errors": [
+        "缺少 XBRL 标签: gross_profit",
+        "缺少 XBRL 标签: eps_basic",
+        "缺少 XBRL 标签: capex",
+        "PDF 未提取到: gross_profit",
+        "PDF 未提取到: total_equity",
+        "PDF 未提取到: capex"
+      ],
+      "misses": []
+    },
+    {
+      "id": "JPM",
+      "name": "JPMorgan",
+      "pdf": "/Users/xubaotian/pdf-intelligence/tests/benchmark/financial_10k/jpm_2024_10k.pdf",
+      "tier": "B",
+      "pdf_extraction_accuracy": 0.9286,
+      "verification_rate": 0.8823529411764706,
+      "trust_score": 0.5641,
+      "production_ready": false,
+      "recon_matched": 15,
+      "recon_mismatch": 2,
+      "field_hits": "13/14",
+      "errors": [
+        "缺少 XBRL 标签: gross_profit",
+        "缺少 XBRL 标签: operating_income",
+        "缺少 XBRL 标签: capex",
+        "PDF 未提取到: gross_profit",
+        "PDF 未提取到: operating_income",
+        "缺少报表网格: balance",
+        "缺少报表网格: balance",
+        "缺少报表网格: balance",
+        "缺少报表网格: balance",
+        "缺少报表网格: cashflow",
+        "缺少报表网格: cashflow",
+        "缺少报表网格: cashflow",
+        "缺少报表网格: cashflow",
+        "PDF 未提取到: gross_profit",
+        "PDF 未提取到: operating_income",
+        "PDF 未提取到: total_liabilities",
+        "PDF 未提取到: total_equity",
+        "PDF 未提取到: cash",
+        "PDF 未提取到: cff",
+        "PDF 未提取到: capex"
+      ],
+      "misses": [
+        {
+          "field_id": "total_assets",
+          "gt_key": "total_assets",
+          "period_index": 1,
+          "expected": 7838.0,
+          "actual": 78384.0,
+          "matched": false
+        }
+      ]
+    }
+  ]
+}
