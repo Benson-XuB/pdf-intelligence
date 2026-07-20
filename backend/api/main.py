@@ -100,3 +100,12 @@ def favicon_svg():
 def favicon_ico():
     """Fallback: some old browsers request .ico, serve SVG instead."""
     return FileResponse(str(_FRONTEND_DIR / "favicon.svg"), media_type="image/svg+xml")
+
+
+@app.get("/{filename}.html")
+def static_html(filename: str):
+    """Serve any .html file from the frontend directory (e.g., Google verification files)."""
+    target = _FRONTEND_DIR / f"{filename}.html"
+    if target.exists() and target.is_file():
+        return FileResponse(str(target))
+    return {"ok": True}

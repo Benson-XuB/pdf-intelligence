@@ -39,6 +39,10 @@ class AuthMiddleware(BaseHTTPMiddleware):
         if path.startswith("/ui/") or path.startswith("/static/") or path in PUBLIC_PATHS:
             return await call_next(request)
 
+        # Allow root-level .html files (e.g. Google verification files)
+        if path.endswith(".html") and "/" not in path.lstrip("/"):
+            return await call_next(request)
+
         # Allow API docs paths
         if any(path.startswith(p) for p in ("/docs", "/redoc", "/openapi")):
             return await call_next(request)
