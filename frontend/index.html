@@ -641,9 +641,16 @@
     function authFetch(url, options = {}) {
       const headers = { ...(options.headers || {}) };
       if (authToken) headers["Authorization"] = `Bearer ${authToken}`;
-      // Don't set Content-Type for FormData — browser sets it with boundary
       if (options.body instanceof FormData) delete headers["Content-Type"];
-      return fetch(url, { ...options, headers });
+      return fetch(url, { ...options, headers }).then(async res => {
+        if (res.status === 401) {
+          clearAuth();
+          openAuthModal();
+          const data = await res.json().catch(() => ({}));
+          throw new Error(data.detail || "Session expired — please sign in again");
+        }
+        return res;
+      });
     }
 
     // Initialize auth UI
@@ -853,7 +860,11 @@
         // #4: Poll for progress
         pollJob(data.job_id);
       } catch (err) {
-        progressText.textContent = "Failed: " + err.message;
+        if (err.message.includes("expired") || err.message.includes("sign in")) {
+          progressText.textContent = "Session expired — please sign in again";
+        } else {
+          progressText.textContent = "Failed: " + err.message;
+        }
         startBtn.disabled = false;
       }
     }
@@ -893,7 +904,8 @@
             showResult(data);
           }
         } catch {
-          // Ignore polling errors
+          // Stop polling if token expired
+          if (!authToken) { clearPolling(); progressText.textContent = "Session expired — please sign in again"; startBtn.disabled = false; }
         }
       }, 800);
     }
