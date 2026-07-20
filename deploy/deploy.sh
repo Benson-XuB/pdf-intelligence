@@ -86,10 +86,6 @@ JWT_SECRET=__JWT__
 GOOGLE_CLIENT_ID=
 GOOGLE_CLIENT_SECRET=
 
-# Stripe Payments（去 https://dashboard.stripe.com 获取）
-STRIPE_SECRET_KEY=
-STRIPE_WEBHOOK_SECRET=
-
 # ── 可选 ───────────────────────────────
 # DASHSCOPE_API_KEY=          # Qwen VL 云视觉（阿里巴巴）
 # DEEPSEEK_API_KEY=           # DeepSeek-V3 高精度

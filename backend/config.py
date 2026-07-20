@@ -7,8 +7,6 @@ class Settings(BaseSettings):
     sendgrid_api_key: str = ""
     google_client_id: str = ""
     google_client_secret: str = ""
-    stripe_secret_key: str = ""
-    stripe_webhook_secret: str = ""
     base_url: str = "http://localhost:8000"
     guest_max_uploads: int = 1
     confidence_threshold: float = 0.85

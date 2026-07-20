@@ -22,7 +22,7 @@ from backend.export.global_excel import GlobalExcelExporter
 from backend.markets.us.financials_service import UsFinancialsService
 from backend.markets.us.xbrl_adapter import UsSecXbrlAdapter
 from backend.pipeline.orchestrator import PipelineOrchestrator, PipelineResult
-from backend.auth.database import get_tier_limits, log_usage
+from backend.auth.database import log_usage
 
 FEEDBACK_DIR = Path("data/feedback")
 FEEDBACK_DIR.mkdir(parents=True, exist_ok=True)
@@ -401,19 +401,18 @@ def register(app: FastAPI) -> None:
         if not file.filename or not file.filename.lower().endswith(".pdf"):
             raise HTTPException(400, "Only PDF files are supported")
 
-        # Tier enforcement
+        # Auth enforcement — must be logged in
         user_data = getattr(request.state, "user", None)
-        is_guest = getattr(request.state, "is_guest", False)
-        tier = user_data.get("tier", "free") if user_data else "free"
-        limits = get_tier_limits(tier)
+        if not user_data:
+            raise HTTPException(401, "Sign in to upload PDFs.")
 
-        # File size check
+        # File size check (200MB max for all users)
         file_bytes = await file.read()
         file_size_mb = len(file_bytes) / (1024 * 1024)
-        if file_size_mb > limits["max_file_size_mb"]:
+        if file_size_mb > 200:
             raise HTTPException(
                 413,
-                f"File too large ({file_size_mb:.1f}MB). Max {limits['max_file_size_mb']}MB on {tier} tier. Upgrade to upload larger files.",
+                f"File too large ({file_size_mb:.1f}MB). Max 200MB.",
             )
 
         upload_dir = Path(settings.upload_dir)
@@ -425,17 +424,11 @@ def register(app: FastAPI) -> None:
         pdf_path = upload_dir / f"{job_id}_{file.filename}"
         pdf_path.write_bytes(file_bytes)
 
-        # Log usage BEFORE extraction (so middleware can count it for subsequent requests)
-        uid = user_data.get("id") if user_data else None
-        if uid:
-            log_usage(uid, "upload", file.filename)
-        elif is_guest:
-            from backend.auth.database import record_guest_upload
-            from backend.auth.middleware import _client_ip
+        # Log usage
+        uid = user_data.get("id")
+        log_usage(uid, "upload", file.filename)
 
-            record_guest_upload(_client_ip(request))
-
-        # Resolve settings: frontend form values override .env, but tier trumps all
+        # Resolve settings: all engines available to all users
         resolved_enable_docling = enable_docling is not None and enable_docling == "1"
         resolved_fast_mode = fast_mode is not None and fast_mode == "1"
         resolved_use_vlm = use_vlm is not None and use_vlm == "1"
@@ -448,14 +441,6 @@ def register(app: FastAPI) -> None:
 
         # Enforce tier engine limits
         resolved_use_deepseek = use_deepseek is not None and use_deepseek == "1"
-        if not limits.get("allow_deepseek", False):
-            resolved_use_deepseek = False
-        if not limits["allow_docling"]:
-            resolved_enable_docling = False
-        if not limits["allow_qwen"]:
-            resolved_use_vlm = False
-            # Also disable Qwen fallback in confidence threshold (lower it so no fallback triggers)
-            resolved_threshold = 0.0  # disable Qwen auto-fallback for free tier
 
         job = {
             "job_id": job_id,

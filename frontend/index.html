@@ -283,13 +283,6 @@
     }
     .auth-btn:hover { border-color: var(--accent); color: var(--accent); }
 
-    .usage-count {
-      font-size: 0.7rem; padding: 0.2rem 0.5rem; border-radius: 10px;
-      background: rgba(45,212,168,0.12); color: var(--accent);
-      font-weight: 600; margin-left: 0.3rem;
-    }
-    .usage-count.exhausted { background: rgba(255,107,107,0.15); color: #ff6b6b; }
-
     .success-msg {
       display: none; font-size: 0.78rem; padding: 0.5rem 0.75rem;
       background: rgba(45,212,168,0.1); border: 1px solid rgba(45,212,168,0.25);
@@ -317,13 +310,6 @@
     }
     .auth-divider span { padding: 0 0.75rem; }
 
-    .tier-tag {
-      font-size: 0.6rem; padding: 0.1rem 0.35rem; border-radius: 4px;
-      font-weight: 600; margin-left: 0.25rem; vertical-align: middle;
-    }
-    .tier-tag.pro { background: rgba(45,212,168,0.18); color: var(--accent); }
-    .tier-tag.enterprise { background: rgba(191,123,250,0.18); color: #bf7bfa; }
-
     /* Modal overlay */
     .modal-overlay {
       display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55);
@@ -347,18 +333,6 @@
     .modal-box .error-msg { font-size: 0.72rem; color: var(--red); margin-top: 0.4rem; display: none; }
     .modal-box .error-msg.visible { display: block; }
 
-    /* Tier cards */
-    .tier-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 1.5rem; }
-    .tier-card {
-      background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm);
-      padding: 1.2rem; text-align: center; transition: border-color 0.15s;
-    }
-    .tier-card.current { border-color: var(--accent); border-width: 2px; }
-    .tier-card h4 { margin: 0 0 0.3rem; font-size: 0.9rem; }
-    .tier-card .tier-price { font-size: 1.1rem; font-weight: 700; color: var(--accent); margin-bottom: 0.5rem; }
-    .tier-card ul { text-align: left; font-size: 0.72rem; color: var(--muted); padding-left: 1.2rem; margin: 0.5rem 0; }
-    .tier-card ul li { margin-bottom: 0.2rem; }
-    .tier-card button { margin-top: 0.6rem; }
   </style>
 </head>
 <body>
@@ -453,7 +427,7 @@
           <div class="setting-body">
             <span class="setting-label">DeepSeek High Accuracy</span>
             <span class="tip">?<span class="tip-text">Uses DeepSeek-V3 vision model as a third-pass fallback on low-confidence pages. Dramatically improves accuracy on scanned or poorly formatted PDFs. Pro & Enterprise only.</span></span>
-            <div class="setting-desc">DeepSeek-V3 cloud vision — highest accuracy, <span id="deepseekTierNote" class="tier-tag pro">Pro+</span></div>
+            <div class="setting-desc">DeepSeek-V3 cloud vision — highest accuracy</div>
           </div>
         </label>
 
@@ -517,7 +491,7 @@
   <div class="modal-overlay" id="authModal">
     <div class="modal-box" id="authModalBox" style="width:380px;text-align:center;">
       <h3>Sign in to PDF Intelligence</h3>
-      <p style="font-size:0.78rem;color:var(--muted);margin-bottom:1.25rem;">Get 2 free PDF extractions</p>
+      <p style="font-size:0.78rem;color:var(--muted);margin-bottom:1.25rem;">Sign in to start extracting PDFs</p>
 
       <!-- Google button -->
       <button class="google-btn" onclick="signInWithGoogle()">
@@ -550,18 +524,6 @@
     </div>
   </div>
 
-  <!-- Subscription Panel -->
-  <div class="modal-overlay" id="subscriptionModal">
-    <div class="modal-box" style="width:600px;max-width:95vw;">
-      <h3>Your Plan</h3>
-      <p style="font-size:0.78rem;color:var(--muted);">Current: <b id="subCurrentTier">Free</b></p>
-      <div class="tier-cards" id="tierCards"></div>
-      <div style="text-align:right;margin-top:1rem;">
-        <button class="auth-btn" onclick="closeSubscriptionModal()">Close</button>
-      </div>
-    </div>
-  </div>
-
   <script>
     const API = window.location.port === "8000" ? "http://localhost:8000" : "";
     const $ = id => document.getElementById(id);
@@ -587,55 +549,19 @@
       updateAuthUI();
     }
 
-    let tierInfoCache = null;
-
     function updateAuthUI() {
       const area = $("authArea");
       if (authUser) {
-        const tierColor = authUser.tier === "pro" ? "pro" : authUser.tier === "enterprise" ? "enterprise" : "free";
-        let extraBadge = "";
-        let billingBtn = "";
-        if (authUser.tier === "free" && tierInfoCache) {
-          const remaining = Math.max(0, (tierInfoCache.lifetime_limit || 2) - (tierInfoCache.lifetime_uploads || 0));
-          extraBadge = `<span class="usage-count ${remaining === 0 ? 'exhausted' : ''}">${remaining} upload${remaining !== 1 ? 's' : ''} left</span>`;
-        }
-        if (authUser.tier === "pro" || authUser.tier === "enterprise") {
-          billingBtn = `<button class="auth-btn" onclick="manageBilling()" title="Cancel or update plan">Billing</button>`;
-        }
         area.innerHTML = `
-          <span class="user-badge ${tierColor}" onclick="openSubscriptionModal()" title="Click to manage plan">
-            ${authUser.email} · ${authUser.tier.toUpperCase()}
+          <span class="user-badge">
+            ${authUser.email}
           </span>
-          ${extraBadge}
-          ${billingBtn}
           <button class="auth-btn" onclick="clearAuth()" title="Logout">Logout</button>
         `;
       } else {
         area.innerHTML = `
           <button class="auth-btn" id="loginBtn" onclick="openAuthModal()">Sign In</button>
         `;
-      }
-      // Update DeepSeek toggle based on tier
-      updateDeepseekToggle();
-    }
-
-    function updateDeepseekToggle() {
-      const cb = $("deepseekMode");
-      const label = document.getElementById("deepseekSetting");
-      const note = $("deepseekTierNote");
-      if (!cb || !label) return;
-
-      if (!authUser || authUser.tier === "free") {
-        cb.disabled = true;
-        cb.checked = false;
-        label.style.opacity = "0.5";
-        note.textContent = "Pro+";
-        note.className = "tier-tag pro";
-      } else {
-        cb.disabled = false;
-        label.style.opacity = "1";
-        note.textContent = authUser.tier === "pro" ? "Pro" : "Enterprise";
-        note.className = authUser.tier === "pro" ? "tier-tag pro" : "tier-tag enterprise";
       }
     }
 
@@ -711,69 +637,6 @@
       }
     }
 
-    // ── Subscription Modal ──────────────────────────────────────────
-    async function openSubscriptionModal() {
-      if (!authUser) return;
-      $("subCurrentTier").textContent = authUser.tier.toUpperCase();
-      $("subscriptionModal").classList.add("visible");
-
-      try {
-        const res = await fetch(`${API}/api/auth/me`, {
-          headers: authToken ? { "Authorization": `Bearer ${authToken}` } : {},
-        });
-        if (!res.ok) return;
-        const data = await res.json();
-        tierInfoCache = data.tier_info || null;
-        updateAuthUI();  // refresh counter
-        renderTierCards(data.available_tiers || [], data.user.tier, data.tier_info);
-      } catch {}
-    }
-
-    function closeSubscriptionModal() {
-      $("subscriptionModal").classList.remove("visible");
-    }
-
-    function renderTierCards(tiers, currentTier, tierInfo) {
-      const container = $("tierCards");
-      container.innerHTML = tiers.map(t => `
-        <div class="tier-card ${t.id === currentTier ? 'current' : ''}">
-          <h4>${t.name}</h4>
-          <div class="tier-price">${t.price}</div>
-          <ul>${t.features.map(f => `<li>${f}</li>`).join("")}</ul>
-          ${t.id === currentTier
-            ? `<button class="btn" disabled style="opacity:0.5;width:100%;">Current Plan</button>`
-            : `<button class="btn" onclick="upgradeTier('${t.id}')" style="width:100%;">${currentTier === 'free' ? 'Upgrade' : 'Switch'} to ${t.name}</button>`
-          }
-        </div>
-      `).join("");
-    }
-
-    async function upgradeTier(tier) {
-      try {
-        const res = await fetch(`${API}/api/auth/upgrade?tier=${tier}`, {
-          method: "POST",
-          headers: { "Authorization": `Bearer ${authToken}` },
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.detail || "Upgrade failed");
-
-        // If Stripe is configured, redirect to Checkout
-        if (data.url) {
-          window.location.href = data.url;
-          return;
-        }
-
-        // Dev mode: direct upgrade (no Stripe)
-        authUser.tier = tier;
-        localStorage.setItem("pi_user", JSON.stringify(authUser));
-        updateAuthUI();
-        closeSubscriptionModal();
-        alert(`Upgraded to ${tier.toUpperCase()}! (Dev mode — no payment)`);
-      } catch (e) {
-        alert(e.message);
-      }
-    }
-
     // ── Auth header injection ───────────────────────────────────────
     function authFetch(url, options = {}) {
       const headers = { ...(options.headers || {}) };
@@ -789,7 +652,6 @@
     // Click outside to close modals
     document.addEventListener("click", e => {
       if (e.target.id === "authModal") closeAuthModal();
-      if (e.target.id === "subscriptionModal") closeSubscriptionModal();
     });
 
     // ── Original consts ────────────────────────────────────────────
@@ -1353,41 +1215,6 @@
       });
     });
 
-    // ── Stripe Billing Portal ───────────────────────────────────────
-    async function manageBilling() {
-      try {
-        const res = await fetch(`${API}/api/stripe/portal`, {
-          method: "POST",
-          headers: { "Authorization": `Bearer ${authToken}` },
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.detail || "Billing portal failed");
-        if (data.url) window.location.href = data.url;
-      } catch (e) { alert(e.message); }
-    }
-
-    // ── Handle Stripe return (success/cancel from Checkout) ─────────
-    (function() {
-      const params = new URLSearchParams(window.location.search);
-      const sessionId = params.get("session_id");
-      const tier = params.get("tier");
-      if (sessionId && authToken) {
-        // Refresh user info from server after returning from Stripe
-        fetch(`${API}/api/auth/me`, {
-          headers: { "Authorization": `Bearer ${authToken}` },
-        }).then(r => r.json()).then(data => {
-          if (data.user) {
-            authUser = data.user;
-            localStorage.setItem("pi_user", JSON.stringify(authUser));
-            updateAuthUI();
-          }
-          // Clean URL
-          if (window.history.replaceState) {
-            window.history.replaceState({}, document.title, window.location.pathname);
-          }
-        }).catch(() => {});
-      }
-    })();
   </script>
 </body>
 </html>
