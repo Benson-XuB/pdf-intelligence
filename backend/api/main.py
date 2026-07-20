@@ -79,3 +79,24 @@ def dashboard_page():
     if target.exists():
         return FileResponse(str(target))
     return {"ok": True}
+
+
+@app.get("/robots.txt")
+def robots_txt():
+    return FileResponse(str(_FRONTEND_DIR / "robots.txt"), media_type="text/plain")
+
+
+@app.get("/sitemap.xml")
+def sitemap_xml():
+    return FileResponse(str(_FRONTEND_DIR / "sitemap.xml"), media_type="application/xml")
+
+
+@app.get("/favicon.svg")
+def favicon_svg():
+    return FileResponse(str(_FRONTEND_DIR / "favicon.svg"), media_type="image/svg+xml")
+
+
+@app.get("/favicon.ico")
+def favicon_ico():
+    """Fallback: some old browsers request .ico, serve SVG instead."""
+    return FileResponse(str(_FRONTEND_DIR / "favicon.svg"), media_type="image/svg+xml")
